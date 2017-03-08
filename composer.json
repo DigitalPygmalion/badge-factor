@@ -1,0 +1,33 @@
+{
+  "name": "ctrlweb/badge-factor",
+  "description": "",
+  "type": "wordpress-plugin",
+  "keywords": [
+    "badgeos",
+    "gravityforms",
+    "buddypress",
+    "wordpress"
+  ],
+  "homepage": "https://github.com/ctrlwebinc/badge-factor",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "ctrlweb",
+      "homepage": "https://ctrlweb.ca/",
+      "email": "dev@ctrlweb.ca"
+    },
+    {
+      "name": "2 associes",
+      "homepage": "https://2associes.com/",
+      "email": "hugues@2associes.com"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/ctrlwebinc/badge-factor/issues",
+    "wiki": "https://github.com/ctrlwebinc/badge-factor/wiki"
+  },
+  "require": {
+    "composer/installers": "~1.0",
+    "php": ">=5.6"
+  }
+}
