@@ -246,7 +246,7 @@ class BadgeFactor
     {
         /* Check minimum requirements are met */
         $this->is_compatible_wordpress_version();
-        $this->check_gravity_forms();
+
         /* Check if any errors were thrown, enqueue them and exit early */
         if ( sizeof( $this->notices ) > 0 ) {
             add_action( 'admin_notices', array( $this, 'display_notices' ) );
@@ -281,24 +281,30 @@ class BadgeFactor
         $post_id = $post->ID;
         $message = "";
 
-        $form_page_id = get_post_meta($post_id, 'badgefactor_form_page_id', true);
-        if ($form_page_id !== '' && is_numeric($form_page_id) )
+        if ($this->check_gravity_forms())
         {
-            $message .= "<a target='_blank' href='".get_admin_url()."post.php?post={$form_page_id}&action=edit'>".__('Form Page', 'badgefactor')."</a><br/>";
-        }
-        else
-        {
-            $message .= __("Form Page not linked!", 'badgefactor')."<br/>";
-        }
+            $form_page_id = get_post_meta($post_id, 'badgefactor_form_page_id', true);
+            if ($form_page_id !== '' && is_numeric($form_page_id) )
+            {
+                $message .= "<a target='_blank' href='".get_admin_url()."post.php?post={$form_page_id}&action=edit'>".__('Form Page', 'badgefactor')."</a><br/>";
+            }
+            else
+            {
+                $message .= __("Form Page not linked!", 'badgefactor')."<br/>";
+            }
 
-        $form_id = get_post_meta($post_id, 'badgefactor_form_id', true);
-        if ($form_id !== '' && is_numeric($form_id) )
-        {
-            $message .= "<a target='_blank' href='".get_admin_url()."admin.php?page=gf_edit_forms&id={$form_id}'>".__('Form', 'badgefactor')."</a><br/>";
-        }
-        else
-        {
-            $message .= __("Form not linked!", 'badgefactor')."<br/>";
+            $form_id = get_post_meta($post_id, 'badgefactor_form_id', true);
+            if ($form_id !== '' && is_numeric($form_id) )
+            {
+                $message .= "<a target='_blank' href='".get_admin_url()."admin.php?page=gf_edit_forms&id={$form_id}'>".__('Form', 'badgefactor')."</a><br/>";
+            }
+            else
+            {
+                $message .= __("Form not linked!", 'badgefactor')."<br/>";
+            }
+
+        } else {
+            $message .= __("GravityForms not used.", 'badgefactor')."<br/>";
         }
 
         $page_id = get_post_meta($post_id, 'badgefactor_page_id', true);
@@ -312,7 +318,6 @@ class BadgeFactor
         }
 
         $field['message'] = $message;
-
         
         return $field;
     }
@@ -384,17 +389,20 @@ class BadgeFactor
         {
             if (get_post_meta( $ID, 'badgefactor_form_id', true) == '')
             {
-                $form_id = $this->create_badge_submission_form($post);
-                if (!is_wp_error($form_id))
+                if ($this->check_gravity_forms())
                 {
-                    update_post_meta( $ID, 'badgefactor_form_id', $form_id );
-
-                    if (get_post_meta( $ID, 'badgefactor_form_page_id', true) == '')
+                    $form_id = $this->create_badge_submission_form($post);
+                    if (!is_wp_error($form_id))
                     {
-                        $form_page_id = $this->create_badge_form_page($post->post_title, $form_id);
-                        if (!is_wp_error($form_page_id))
+                        update_post_meta( $ID, 'badgefactor_form_id', $form_id );
+
+                        if (get_post_meta( $ID, 'badgefactor_form_page_id', true) == '')
                         {
-                            update_post_meta($ID, 'badgefactor_form_page_id', $form_page_id);
+                            $form_page_id = $this->create_badge_form_page($post->post_title, $form_id);
+                            if (!is_wp_error($form_page_id))
+                            {
+                                update_post_meta($ID, 'badgefactor_form_page_id', $form_page_id);
+                            }
                         }
                     }
                 }
@@ -409,8 +417,6 @@ class BadgeFactor
                 }
                 wp_update_post(array('ID' => $form_page_id, 'post_parent' => $page_id));
             }
-
-
 
             return TRUE;
         }
@@ -427,19 +433,22 @@ class BadgeFactor
         $post = get_post($post_id);
         if ($post !== NULL && $post->post_type == 'badges')
         {
-            $form_page_id = get_post_meta($post_id, 'badgefactor_form_page_id', true);
-            if ($form_page_id !== '' && is_numeric($form_page_id) )
+            if ($this->check_gravity_forms())
             {
-                $form_page_trashed = wp_trash_post((int)$form_page_id);
-                if (!$form_page_trashed) return new WP_Error('error', __("Cannot trash form page associated to badge!", 'badgefactor'));
-            }
+                $form_page_id = get_post_meta($post_id, 'badgefactor_form_page_id', true);
+                if ($form_page_id !== '' && is_numeric($form_page_id) )
+                {
+                    $form_page_trashed = wp_trash_post((int)$form_page_id);
+                    if (!$form_page_trashed) return new WP_Error('error', __("Cannot trash form page associated to badge!", 'badgefactor'));
+                }
 
-            $form_id = get_post_meta($post_id, 'badgefactor_form_id', true);
-            if ($form_id !== '' && is_numeric($form_id) )
-            {
+                $form_id = get_post_meta($post_id, 'badgefactor_form_id', true);
+                if ($form_id !== '' && is_numeric($form_id) )
+                {
 
-                $form_trashed = GFAPI::delete_form((int)$form_id);
-                if (!$form_trashed) return new WP_Error('error', __("Cannot trash form associated to badge!", 'badgefactor'));
+                    $form_trashed = GFAPI::delete_form((int)$form_id);
+                    if (!$form_trashed) return new WP_Error('error', __("Cannot trash form associated to badge!", 'badgefactor'));
+                }
             }
 
             $page_id = get_post_meta($post_id, 'badgefactor_page_id', true);
