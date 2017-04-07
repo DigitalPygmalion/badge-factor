@@ -29,12 +29,12 @@
     </div>
     <ul class="profile-members-badges-list">
 
-        <?php foreach ($GLOBALS['badgefactor']->get_products_by_organisation($post->ID) as $product): ?>
+        <?php foreach ($GLOBALS['badgefactor']->get_badges_by_organisation($post->ID) as $product): ?>
 
         <li class="profile-members-badge">
             <figure class="profile-members-badge-figure">
                 <a href="<?php the_permalink($product->ID); ?>" class="profile-members-badge-link">
-			<img src="<?php echo wp_get_attachment_image_src( get_post_thumbnail_id($product->ID), 'single-post-thumbnail')[0]; ?>" srcset="<?php echo wp_get_attachment_image_src( get_post_thumbnail_id($product->ID), 'single-post-thumbnail')[0]; ?> 1x, <?php echo wp_get_attachment_image_src( get_post_thumbnail_id($product->ID), 'single-post-thumbnail')[0]; ?> 2x" class="profile-members-badge-image">
+                <img src="<?php echo wp_get_attachment_image_src( get_post_thumbnail_id($product->ID), 'single-post-thumbnail')[0]; ?>" srcset="<?php echo wp_get_attachment_image_src( get_post_thumbnail_id($product->ID), 'single-post-thumbnail')[0]; ?> 1x, <?php echo wp_get_attachment_image_src( get_post_thumbnail_id($product->ID), 'single-post-thumbnail')[0]; ?> 2x" class="profile-members-badge-image">
                 </a>
                 <figcaption class="profile-members-badge-details">
                     <span class="profile-members-badge-description">

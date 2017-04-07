@@ -847,6 +847,59 @@ class BadgeFactor
 
     }
 
+    /**
+     * Create Submission
+     * @since  1.0.0
+     * @param  integer $achievement_id The achievement ID intended for submission
+     * @param  string  $title          The title of the post
+     * @param  string  $content        The post content
+     * @param  integer $user_id        The user ID
+     * @return boolean                 Returns true if able to create form
+     */
+    function create_submission( $achievement_id  = 0, $title = '', $content = '', $user_id = 0 ) {
+
+        $submission_data = array(
+            'post_title'	=>	$title,
+            'post_content'	=>	$content,
+            'post_status'	=>	'publish',
+            'post_author'	=>	$user_id,
+            'post_type'		=>	'submission',
+        );
+
+        //insert the post into the database
+        if ( $submission_id = wp_insert_post( $submission_data ) ) {
+            // save the achievement ID related to the submission
+            add_post_meta( $submission_id, '_badgeos_submission_achievement_id', $achievement_id );
+
+            // Available action for other processes
+            do_action( 'badgeos_save_submission', $submission_id );
+
+            // Submission status workflow
+            $status_args = array(
+                'achievement_id' => $achievement_id,
+                'user_id' => $user_id
+            );
+
+            $status = 'pending';
+
+            // Check if submission is auto approved or not
+            if ( badgeos_is_submission_auto_approved( $submission_id ) ) {
+                $status = 'approved';
+
+                $status_args[ 'auto' ] = true;
+            }
+
+            badgeos_set_submission_status( $submission_id, $status, $status_args );
+
+            return $submission_id;
+
+        } else {
+
+            return false;
+
+        }
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     //                            PRIVATE METHODS                            //
     ///////////////////////////////////////////////////////////////////////////
