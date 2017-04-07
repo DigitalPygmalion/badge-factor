@@ -1,5 +1,5 @@
 {
-  "name": "ctrlweb/badge-factor",
+  "name": "DigitalPygmalion/badge-factor",
   "description": "",
   "type": "wordpress-plugin",
   "keywords": [
@@ -8,23 +8,17 @@
     "buddypress",
     "wordpress"
   ],
-  "homepage": "https://github.com/ctrlwebinc/badge-factor",
+  "homepage": "https://github.com/DigitalPygmalion/badge-factor",
   "license": "MIT",
   "authors": [
     {
       "name": "ctrlweb",
-      "homepage": "https://ctrlweb.ca/",
-      "email": "dev@ctrlweb.ca"
-    },
-    {
-      "name": "2 associes",
-      "homepage": "https://2associes.com/",
-      "email": "hugues@2associes.com"
+      "homepage": "https://ctrlweb.ca/"
     }
   ],
   "support": {
-    "issues": "https://github.com/ctrlwebinc/badge-factor/issues",
-    "wiki": "https://github.com/ctrlwebinc/badge-factor/wiki"
+    "issues": "https://github.com/DigitalPygmalion/badge-factor/issues",
+    "wiki": "https://github.com/DigitalPygmalion/badge-factor/wiki"
   },
   "require": {
     "composer/installers": "~1.0",

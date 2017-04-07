@@ -250,7 +250,7 @@ class BadgeFactor
         /* Check if any errors were thrown, enqueue them and exit early */
         if ( sizeof( $this->notices ) > 0 ) {
             add_action( 'admin_notices', array( $this, 'display_notices' ) );
-            deactivate_plugins( plugin_basename( __FILE__ ) );
+            // FIXME deactivate_plugins( plugin_basename( __FILE__ ) );
 
             if ( isset( $_GET['activate'] ) )
             {
