@@ -134,8 +134,7 @@ class BadgeFactor
         $credly_settings['credly_badge_sendemail_add_message'] = 'false';
         update_option( 'credly_settings', $credly_settings );
 
-        // Register our post types and flush rewrite rules
-        badgeos_flush_rewrite_rules();
+        flush_rewrite_rules();
     }
 
 
