@@ -1,56 +1,53 @@
-<section class="profile-organisation-badges">
-    <div id="post-<?php echo $post->ID; ?>" <?php post_class(); ?>>
-        <div class="container">
-            <div class="row">
-                <section class="badge-summary">
-                    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4" style="text-align:center;">
-                        <?php echo get_the_post_thumbnail($post, 'full'); ?>
-                        <div style="margin-top:15px;">
-                            <h4><?php _e('Issued by', 'badgefactor'); ?></h4>
-                            <a href="<?php echo $GLOBALS['badgefactor']->get_badge_issuer_url($post->ID); ?>" style="text-decoration:none; font-size:15px;"><?php echo $GLOBALS['badgefactor']->get_badge_issuer_name($post->ID); ?></a>
+<?php get_template_part('templates/page', 'header'); ?>
 
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-6 col-md-8 col-lg-8">
-                        <a class="btn btn-default" href="<?php echo $GLOBALS['badgefactor']->get_badge_page_url($post->ID); ?>"><?php _e('Take this course', 'badgefactor'); ?></a>
-                        <h2><?php echo $post->post_title; ?></h2>
-                        <h3 class="badge-description-heading"><?php _e('Description', 'badgefactor'); ?></h3>
-                        <?php echo wpautop($post->post_content); ?>
+<div class="profile-organisation-intro">
+    <?php echo $organisation->post_content; ?>
+</div>
 
-                        <h3 class="badge-criteria-heading"><?php echo $GLOBALS['badgefactor']->get_badge_criteria_title($post->ID); ?></h3>
-                        <?php echo wpautop($GLOBALS['badgefactor']->get_badge_criteria($post->ID)); ?>
-                    </div>
-                </section>
-            </div>
-            <div class="row">
-                <section class="badge-members">
-                    <div class="badge-members-heading col-xs-12">
-                        <h3 class="badges-unique-members-heading-title">
-                            <?php _e('Members who obtained this badge', 'badgefactor'); ?> <small class="badge-members-count"><?php echo $GLOBALS['badgefactor']->get_nb_badge_earners($post->ID); ?> <?php _e('People', 'badgefactor'); ?></small>
-                        </h3>
-                    </div>
-                    <?php if ($GLOBALS['badgefactor']->get_nb_badge_earners($post->ID) === 0): ?>
-                    <div class="badge-member col-xs-12">
-                        <?php _e('No one has earned this badge for the moment.', 'badgefactor'); ?>
-                    </div>
-                    <?php else: ?>
-                        <?php foreach ($GLOBALS['badgefactor']->get_badge_earners($post->ID) as $member): ?>
-                            <div class="badge-member col-xs-6 col-sm-4 col-md-3 col-lg-2">
-                                <figure class="badge-member-figure">
-                                    <a href="<?php echo bp_core_get_user_domain($member->ID); ?>" class="badge-member-link">
-                                        <?php echo get_avatar($member->ID, 140); ?>
-                                    </a>
-                                    <figcaption class="badge-member-name">
-                                        <a href="<?php echo bp_core_get_user_domain($member->ID); ?>" class="badge-member-link">
-                                            <?php echo bp_core_get_user_displayname($member->ID); ?>
-                                        </a>
-                                    </figcaption>
-                                </figure>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </section>
-            </div>
-        </div>
+<section class="profile-members-badges">
+    <div class="profile-members-badges-heading"><span class="separator-prefix"></span>
+        <h3 class="profile-organisation-badges-heading-title">
+            <?php _e('Available badges', 'badgefactor'); ?>
+            <small class="profile-members-badges-available">
+                <?php echo $GLOBALS['badgefactor']->get_nb_badges_by_organisation($post->ID); ?> <?php _e('available', 'badgefactor'); ?>
+            </small>
+        </h3>
+        <ul class="profile-organisation-badges-cta">
+            <li class="profile-members-badges-cta-item">
+                <button type="button" class="profile-members-badges-cta-item-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <?php the_title(); ?>
+                    <i class="profile-members-badges-cta-item-btn-caret"></i>
+                </button>
+                <ul class="profile-members-badges-cta-item-dropdown">
+                    <li><a href="<?php echo get_permalink(1504);?>">Tous</a></li>
+                    <?php foreach ($GLOBALS['badgefactor']->get_badge_organisations(true) as $organisation): ?>
+                        <li><a href="<?php the_permalink($organisation->ID); ?>"><?php echo $organisation->post_title; ?></a></li>
+                    <?php endforeach; ?>
+
+                </ul>
+            </li>
+        </ul>
+
     </div>
+    <ul class="profile-members-badges-list">
+
+        <?php foreach ($GLOBALS['badgefactor']->get_badges_by_organisation($post->ID) as $product): ?>
+
+            <li class="profile-members-badge">
+                <figure class="profile-members-badge-figure">
+                    <a href="<?php the_permalink($product->ID); ?>" class="profile-members-badge-link">
+                        <img src="<?php echo wp_get_attachment_image_src( get_post_thumbnail_id($product->ID), 'single-post-thumbnail')[0]; ?>" srcset="<?php echo wp_get_attachment_image_src( get_post_thumbnail_id($product->ID), 'single-post-thumbnail')[0]; ?> 1x, <?php echo wp_get_attachment_image_src( get_post_thumbnail_id($product->ID), 'single-post-thumbnail')[0]; ?> 2x" class="profile-members-badge-image">
+                    </a>
+                    <figcaption class="profile-members-badge-details">
+                    <span class="profile-members-badge-description">
+                      	<?php
+                        echo $product->post_title;
+                        ?>
+                    </span>
+                    </figcaption>
+                </figure>
+            </li>
+
+        <?php endforeach; ?>
+    </ul>
 </section>
