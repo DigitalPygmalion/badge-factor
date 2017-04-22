@@ -1458,6 +1458,30 @@ class BadgeFactor
         return $new_status;
     }
 
+    /**
+     * Get the Buddypress login page.
+     * @return bool
+     */
+    public function bf_login_page(){
+        //Get the bf-pages option, deserialize this information and get the id related to the register key.
+
+        $bf_pages = get_option('bp-pages');
+
+        //If this variable is false, the BP plugin is not on the site.
+        if($bf_pages){
+            foreach ( $bf_pages as $key => $bf_page){
+                if(strtolower($key) == "register"){
+                    $return = $bf_page;
+                }
+            }
+        }
+        else{
+            $return = false;
+        }
+
+        return $return;
+    }
+
 }
 
 $GLOBALS['badgefactor'] = new BadgeFactor();
