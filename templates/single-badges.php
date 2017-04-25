@@ -5,7 +5,7 @@
         <div class="container single-badge">
             <div class="row">
                 <section class="badge-summary">
-                    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4" style="text-align:center;">
+                    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 badge-image-wrapper" style="text-align:center;">
                         <?php echo get_the_post_thumbnail($post, 'full'); ?>
                         <div style="margin-top:15px;">
                             <h4><?php _e('Issued by', 'badgefactor'); ?></h4>
