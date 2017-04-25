@@ -1,0 +1,265 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Badge Factor\n"
+"POT-Creation-Date: 2017-04-24 07:48-0400\n"
+"PO-Revision-Date: 2017-04-24 07:59-0400\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: fr_FR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.0.1\n"
+"X-Poedit-Basepath: ..\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Poedit-Flags-xgettext: --add-comments=translators:\n"
+"X-Poedit-WPHeader: badgefactor.php\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;"
+"_n_noop:1,2;_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: *.js\n"
+
+#: badgefactor.php:172
+msgid "Badge Factor Options"
+msgstr "Options de Badge Factor"
+
+#: badgefactor.php:172
+msgid "Options"
+msgstr "Options"
+
+#: badgefactor.php:181
+msgid "You do not have sufficient permissions to access this page."
+msgstr "Vous n’avez pas les autorisations requises pour accéder à cette page."
+
+#: badgefactor.php:198
+#, php-format
+msgid "%sGravity Forms%s Version %s is required. %sGet more info%s."
+msgstr "%sGravity Forms%s Version %s est requis. %sPlus d’info%s."
+
+#: badgefactor.php:210
+msgid "Badge Factor Installation Problem"
+msgstr "Problème d’installation de Badge Factor"
+
+#: badgefactor.php:212
+msgid ""
+"The minimum requirements for Badge Factor have not been met. Please fix the "
+"issue(s) below to continue:"
+msgstr ""
+"Les pré-requis minimum pour l’installation de Badge Factor ne sont pas "
+"présents. Veuillez corriger les problèmes ci-dessous pour continuer :"
+
+#: badgefactor.php:235
+#, php-format
+msgid "WordPress Version %s is required. %sGet more info%s."
+msgstr "WordPress Version %s est requis. %sPlus d’info%s."
+
+#: badgefactor.php:288
+msgid "Form Page"
+msgstr "Page de formulaire"
+
+#: badgefactor.php:292
+msgid "Form Page not linked!"
+msgstr "Page de formulaire non liée!"
+
+#: badgefactor.php:298
+msgid "Form"
+msgstr "Formulaire"
+
+#: badgefactor.php:302
+msgid "Form not linked!"
+msgstr "Formulaire non lié!"
+
+#: badgefactor.php:306
+msgid "GravityForms not used."
+msgstr "GravityForms inutilisé."
+
+#: badgefactor.php:312
+msgid "Description Page"
+msgstr "Page de description"
+
+#: badgefactor.php:316
+msgid "Description Page not linked!"
+msgstr "Page de description non liée!"
+
+#: badgefactor.php:334
+msgid "Submission Settings"
+msgstr "Paramètres de soumission"
+
+#: badgefactor.php:338
+msgid "Public"
+msgstr "Publique"
+
+#: badgefactor.php:412
+msgid "Get this badge"
+msgstr "Obtenez ce badge"
+
+#: badgefactor.php:422
+msgid "Badge is not of valid post type!"
+msgstr "Badge n’est pas un type de contenu valide!"
+
+#: badgefactor.php:441
+msgid "Cannot trash form page associated to badge!"
+msgstr "Impossible de supprimer la page de formulaire associée au badge!"
+
+#: badgefactor.php:449
+msgid "Cannot trash form associated to badge!"
+msgstr "Impossible de supprimer le formulaire associée au badge!"
+
+#: badgefactor.php:457
+msgid "Cannot trash page associated to badge!"
+msgstr "Impossible de supprimer la page associée au badge!"
+
+#: badgefactor.php:472 badgefactor.php:478
+msgid "Badges"
+msgstr "Badges"
+
+#: badgefactor.php:473 settings-page.tpl.php:17
+msgid "Badge"
+msgstr "Badge"
+
+#: badgefactor.php:474
+msgid "Add New"
+msgstr "Nouveau"
+
+#: badgefactor.php:475
+msgid "Add New Badge"
+msgstr "Créer badge"
+
+#: badgefactor.php:476
+msgid "Edit Badge"
+msgstr "Éditer badge"
+
+#: badgefactor.php:477
+msgid "New Badge"
+msgstr "Nouveau badge"
+
+#: badgefactor.php:479
+msgid "View Badges"
+msgstr "Afficher badges"
+
+#: badgefactor.php:480
+msgid "Search Badges"
+msgstr "Chercher badges"
+
+#: badgefactor.php:481
+msgid "No Badge found"
+msgstr "Aucun badge trouvé"
+
+#: badgefactor.php:482
+msgid "No Badge found in Trash"
+msgstr "Aucun badge trouvé dans la corbeille"
+
+#: badgefactor.php:508 badgefactor.php:547
+msgid "Category"
+msgstr "Catégorie"
+
+#: badgefactor.php:524 badgefactor.php:731
+msgid "Organisation"
+msgstr "Organisation"
+
+#: badgefactor.php:569
+msgid "Endorsed by"
+msgstr "Reconnu par"
+
+#: badgefactor.php:592
+msgid "Useful links"
+msgstr "Liens utiles"
+
+#: badgefactor.php:652
+msgid "Badge Criteria"
+msgstr "Critères du badge"
+
+#: badgefactor.php:656
+msgid "Section Title"
+msgstr "Titre de section"
+
+#: badgefactor.php:667 badgefactor.php:677
+msgid "Criteria"
+msgstr "Critère"
+
+#: badgefactor.php:730
+msgid "Organisations"
+msgstr "Organisations"
+
+#: badgefactor.php:748
+msgid "Organisation Fields"
+msgstr "Champs d’organisation"
+
+#: badgefactor.php:917 badgefactor.php:1024
+msgid "Invalid badge object"
+msgstr "Object badge invalide"
+
+#: badgefactor.php:970
+msgid "Form name is not unique!"
+msgstr "Le nom du formulaire n’est pas unique!"
+
+#: settings-page.tpl.php:2
+msgid "Badge Factor Settings"
+msgstr "Paramètres de Badge Factor"
+
+#: settings-page.tpl.php:8
+msgid "Form Page Text"
+msgstr "Texte de la page de formulaire"
+
+#: settings-page.tpl.php:9
+msgid "In order to get this badge, please submit the following."
+msgstr "Afin d’obtenir ce badge, veuillez soumettre le formulaire suivant."
+
+#: settings-page.tpl.php:12
+msgid "Default Form Button Text"
+msgstr "Texte de bouton de formulaire par défaut"
+
+#: settings-page.tpl.php:13
+msgid "Submit"
+msgstr "Soumettre"
+
+#: settings-page.tpl.php:16
+msgid "Default Certificate Name"
+msgstr "Nom de certificat par défaut"
+
+#: templates/archive-badges.php:6
+msgid "All badges"
+msgstr "Tous les badges"
+
+#: templates/archive-badges.php:6 templates/single-badges.php:12
+#: templates/single-organisation.php:12
+msgid "available"
+msgstr "disponible"
+
+#: templates/archive-badges.php:8
+msgid "Filter by organization"
+msgstr "Filtrer par organisation"
+
+#: templates/archive-badges.php:14
+msgid "Filter by category"
+msgstr "Filtrer par catégorie"
+
+#: templates/single-badges.php:10 templates/single-organisation.php:10
+msgid "Available badges"
+msgstr "Badges disponibles"
+
+#. Plugin Name of the plugin/theme
+msgid "Badge Factor"
+msgstr "Badge Factor"
+
+#. Plugin URI of the plugin/theme
+msgid "https://github.com/ctrlwebinc/badge-factor"
+msgstr "https://github.com/ctrlwebinc/badge-factor"
+
+#. Description of the plugin/theme
+msgid ""
+"Badge Factor is a \"glue\" plugin which brings together many different "
+"plugins in order to deliver a comprehensive open badge solution."
+msgstr ""
+"Badge Factor est une extension « glue » qui rassemble plusieurs extensions "
+"afin d’offrir une solution d’open badges complète."
+
+#. Author of the plugin/theme
+msgid "ctrlweb"
+msgstr "ctrlweb"
+
+#. Author URI of the plugin/theme
+msgid "https://ctrlweb.ca/"
+msgstr "https://ctrlweb.ca/"
