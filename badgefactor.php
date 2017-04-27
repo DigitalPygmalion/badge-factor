@@ -92,6 +92,7 @@ class BadgeFactor
         add_action( 'init', array($this, 'create_cpt_organisation'));
         add_action( 'init', array($this, 'create_cpt_badge'));
         add_action( 'init', array($this, 'update_cpt_submission'));
+        add_action( 'init', array($this, 'add_member_badges_page'));
 
         add_action( 'publish_badges', array($this, 'create_badge_chain'), 10, 2);
         add_action( 'wp_trash_post',  array($this, 'trash_badge_chain'), 10, 1);
@@ -102,6 +103,7 @@ class BadgeFactor
         add_filter( 'acf/load_field/key=field_57ab18ef7b1d2', array($this, 'generate_useful_links'), 10, 1);
         add_filter( 'single_template',  array($this, 'locate_single_templates'));
         add_filter( 'archive_template', array($this, 'locate_archive_templates'), 10, 1);
+        add_filter( 'query_vars', array($this, 'rewrite_add_badge_var'), 10, 1);
 
         add_theme_support('post-thumbnails');
         add_image_size('square-140', 140, 140, false);
@@ -899,6 +901,21 @@ class BadgeFactor
         }
     }
 
+    public function rewrite_add_badge_var($vars)
+    {
+        $vars[] = 'member';
+        return $vars;
+    }
+
+    public function add_member_badges_page()
+    {
+        // FIXME not working...
+        add_rewrite_tag('%member%', '([^&]+)');
+        add_rewrite_rule('members/([^/]+)/badges/([^/]+)/?$','index.php?badges=$matches[2]&member=$matches[1]','top');
+        flush_rewrite_rules();
+
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     //                            PRIVATE METHODS                            //
     ///////////////////////////////////////////////////////////////////////////
@@ -1128,6 +1145,7 @@ class BadgeFactor
     public function get_nb_badge_earners($badge_id)
     {
         return count($this->get_badge_earners($badge_id));
+
     }
 
     public function get_badge_earners($badge_id)
@@ -1352,14 +1370,14 @@ class BadgeFactor
      */
     public function is_current_page_awarded_achievement()
     {
-        $members_page_slug = get_option('bp-pages')['members'];
+        $members_page_slug = str_replace(home_url()."/", '', get_permalink(get_option('bp-pages')['members']));
         // FIXME Bring into a WP Admin config variable
-        $members_achievement_slug = "achievements";
+        $members_achievement_slug = "badges";
         // FIXME Bring into a WP Admin config variable
         $members_badge_slug = "badges";
-
         global $wp;
-        return preg_match("/{$members_page_slug}\/(.*)\/{$members_achievement_slug}\/{$members_badge_slug}\/(.*)/", $wp->request);
+        return preg_match("#{$members_page_slug}(.*)/{$members_badge_slug}/(.*)#", $wp->request);
+
 
     }
 
