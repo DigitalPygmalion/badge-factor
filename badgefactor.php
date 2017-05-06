@@ -468,6 +468,14 @@ class BadgeFactor
      */
     public function create_cpt_badge()
     {
+        register_taxonomy(
+            'badge_category',
+            'badges',
+            array(
+                'label' => __( 'Category', 'badgefactor'),
+            )
+        );
+
         // Register the post type
         register_post_type( 'badges', array(
             'labels'             => array(
@@ -497,23 +505,12 @@ class BadgeFactor
             'has_archive'        => 'badges',
             'hierarchical'       => true,
             'menu_position'      => null,
-            'supports'           => array( 'title', 'editor', 'excerpt', 'author', 'thumbnail', 'page-attributes' )
+            'supports'           => array( 'title', 'editor', 'excerpt', 'author', 'thumbnail', 'page-attributes' ),
+            'taxonomies'         => array( 'badge_category' ),
         ) );
 
         // Register the Achievement type
         badgeos_register_achievement_type( strtolower( 'Badge' ), strtolower( 'Badges' ) );
-
-        register_taxonomy(
-            'badge_category',
-            'badge',
-            array(
-                'label' => __( 'Category', 'badgefactor'),
-                'capabilities' => array(
-                    'assign_terms' => 'edit_guides',
-                    'edit_terms' => 'publish_guides',
-                )
-            )
-        );
 
         if( function_exists('register_field_group') ):
 
@@ -543,28 +540,6 @@ class BadgeFactor
                         'multiple' => 0,
                         'return_format' => 'object',
                         'ui' => 1,
-                    ),
-                    array (
-                        'key' => 'field_579f81358c890',
-                        'label' => __('Category', 'badgefactor'),
-                        'name' => 'category',
-                        'type' => 'taxonomy',
-                        'instructions' => '',
-                        'required' => 0,
-                        'conditional_logic' => 0,
-                        'wrapper' => array (
-                            'width' => '',
-                            'class' => '',
-                            'id' => '',
-                        ),
-                        'taxonomy' => 'badge_category',
-                        'field_type' => 'checkbox',
-                        'allow_null' => 0,
-                        'add_term' => 1,
-                        'save_terms' => 0,
-                        'load_terms' => 0,
-                        'return_format' => 'id',
-                        'multiple' => 0,
                     ),
                     array (
                         'key' => 'field_579f856ba98ce',
