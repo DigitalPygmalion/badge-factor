@@ -1,6 +1,4 @@
-<?php get_template_part('templates/page', 'header'); ?>
-
-<?php $member = $wp_query->query_vars['member']; ?>
+<?php $member = isset($wp_query->query_vars['member']) ? $wp_query->query_vars['member'] : null; ?>
 <section class="profile-organisation-badges">
     <div id="post-<?php echo $post->ID; ?>" <?php post_class(); ?>>
         <div class="container single-badge">

@@ -468,14 +468,6 @@ class BadgeFactor
      */
     public function create_cpt_badge()
     {
-        register_taxonomy(
-            'badge_category',
-            'badges',
-            array(
-                'label' => __( 'Category', 'badgefactor'),
-            )
-        );
-
         // Register the post type
         register_post_type( 'badges', array(
             'labels'             => array(
@@ -505,12 +497,23 @@ class BadgeFactor
             'has_archive'        => 'badges',
             'hierarchical'       => true,
             'menu_position'      => null,
-            'supports'           => array( 'title', 'editor', 'excerpt', 'author', 'thumbnail', 'page-attributes' ),
-            'taxonomies'         => array( 'badge_category' ),
+            'supports'           => array( 'title', 'editor', 'excerpt', 'author', 'thumbnail', 'page-attributes' )
         ) );
 
         // Register the Achievement type
         badgeos_register_achievement_type( strtolower( 'Badge' ), strtolower( 'Badges' ) );
+
+        register_taxonomy(
+            'badge_category',
+            'badge',
+            array(
+                'label' => __( 'Category', 'badgefactor'),
+                'capabilities' => array(
+                    'assign_terms' => 'edit_guides',
+                    'edit_terms' => 'publish_guides',
+                )
+            )
+        );
 
         if( function_exists('register_field_group') ):
 
@@ -540,6 +543,28 @@ class BadgeFactor
                         'multiple' => 0,
                         'return_format' => 'object',
                         'ui' => 1,
+                    ),
+                    array (
+                        'key' => 'field_579f81358c890',
+                        'label' => __('Category', 'badgefactor'),
+                        'name' => 'category',
+                        'type' => 'taxonomy',
+                        'instructions' => '',
+                        'required' => 0,
+                        'conditional_logic' => 0,
+                        'wrapper' => array (
+                            'width' => '',
+                            'class' => '',
+                            'id' => '',
+                        ),
+                        'taxonomy' => 'badge_category',
+                        'field_type' => 'checkbox',
+                        'allow_null' => 0,
+                        'add_term' => 1,
+                        'save_terms' => 0,
+                        'load_terms' => 0,
+                        'return_format' => 'id',
+                        'multiple' => 0,
                     ),
                     array (
                         'key' => 'field_579f856ba98ce',
@@ -1209,17 +1234,16 @@ class BadgeFactor
         $api_call = $this->getSslPage(WP_HOME.'/api/badge/achievements/?user_id='.$userID);
         $api_call = json_decode($api_call);
         $badges = NULL;
-        $fixed_badges = '';
+        $fixed_badges = [];
         if (NULL !== $api_call && isset($api_call->status) && $api_call->status = 'ok' && isset($api_call->achievements)) {
             $badges = $api_call->achievements;
-            $fixed_badges = array();
+
 
             foreach ($badges as $badge) {
                 $uid_str = explode("?uid=", $badge->uid);
                 $uid_str = $uid_str[1];
                 $uid = explode ( "-" , $uid_str);
                 $badge_id = $uid[0];
-
                 $achievement_id = $wpdb->get_var(
                     $wpdb->prepare(
                         "SELECT pm.meta_value
