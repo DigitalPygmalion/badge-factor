@@ -7,6 +7,10 @@
                     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 badge-image-wrapper" style="text-align:center;">
                         <?php echo get_the_post_thumbnail($post, 'full'); ?>
                         <div style="margin-top:15px;">
+                            <?php if ($member): ?>
+                            <a href="#" style="text-decoration:none; font-size:20px;"><?php echo $member; ?></a>
+                            <p style="text-align:center;"><?php _e('obtained this badge!', 'badgefactor'); ?></p>
+                            <?php endif; ?>
                             <h4><?php _e('Issued by', 'badgefactor'); ?></h4>
                             <a href="<?php echo $GLOBALS['badgefactor']->get_badge_issuer_url($post->ID); ?>" style="text-decoration:none; font-size:15px;"><?php echo $GLOBALS['badgefactor']->get_badge_issuer_name($post->ID); ?></a>
                         </div>
@@ -14,15 +18,20 @@
                     <div class="col-xs-12 col-sm-6 col-md-8 col-lg-8">
                         <h3 class="badge-description-heading">
                             <?php _e('Description', 'badgefactor'); ?>
+                            <?php if (!$member): ?>
                             <a class="btn btn-default add-badge" href="<?php echo $GLOBALS['badgefactor']->get_badge_page_url($post->ID); ?>"><?php _e('Take this course', 'badgefactor'); ?></a>
+                            <?php endif; ?>
                         </h3>
                         <?php echo wpautop($post->post_content); ?>
 
                         <h3 class="badge-criteria-heading"><?php echo $GLOBALS['badgefactor']->get_badge_criteria_title($post->ID); ?></h3>
                         <?php echo wpautop($GLOBALS['badgefactor']->get_badge_criteria($post->ID)); ?>
+
+                        <h3 class="badge-date-heading"><?php _e('Granted on', 'badgefactor'); ?></h3>
                     </div>
                 </section>
             </div>
+            <?php if (!$member): ?>
             <div class="row">
                 <section class="badge-members">
                     <div class="badge-members-heading col-xs-12">
@@ -62,6 +71,7 @@
                     <?php endif; ?>
                 </section>
             </div>
+            <?php endif; ?>
         </div>
     </div>
 </section>
