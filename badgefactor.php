@@ -1356,12 +1356,12 @@ class BadgeFactor
      * @param $user_login
      * @return mixed
      */
-	public function get_submission_id($badge_id, $user_login)
+	public function get_submission_id($badge_id, $wp_user)
     {
         $query = new WP_Query([
             'post_status' => 'publish',
             'post_type' => 'submission',
-            'author_name' => $user_login,
+            'author_name' => $wp_user->user_login,
             'meta_query' => [
                 [
                     'key' => '_badgeos_submission_achievement_id',
@@ -1373,7 +1373,6 @@ class BadgeFactor
         $return = $query->get_posts();
         if (empty($return))
         {
-            $user = get_user_by('login', $user_login);
             $query = new WP_Query([
                 'post_status' => 'publish',
                 'post_type' => 'nomination',
@@ -1384,7 +1383,7 @@ class BadgeFactor
                     ],
                     [
                         'key' => '_badgeos_nomination_user_id',
-                        'value' => $user->ID
+                        'value' => $wp_user->ID
                     ]
                 ],
                 'posts_per_page' => 1,

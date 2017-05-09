@@ -1,7 +1,6 @@
 <?php
-    $member = isset($wp_query->query_vars['member']) ? $wp_query->query_vars['member'] : null;
-
-    $submission = $GLOBALS['badgefactor']->get_submission_id($post->ID, $member);
+    $member = isset($wp_query->query_vars['member']) ? get_user_by('login', $wp_query->query_vars['member']) : null;
+    $submission = $member ? $GLOBALS['badgefactor']->get_submission_id($post->ID, $member): null;
 
 ?>
 
@@ -14,7 +13,7 @@
                         <?php echo get_the_post_thumbnail($post, 'full'); ?>
                         <div style="margin-top:15px;">
                             <?php if ($member): ?>
-                            <a href="#" style="text-decoration:none; font-size:20px;"><?php echo $member; ?></a>
+                            <a href="<?php echo bp_core_get_user_domain($member->ID); ?>" style="text-decoration:none; font-size:20px;"><?php echo $member->display_name; ?></a>
                             <p style="text-align:center;"><?php _e('obtained this badge!', 'badgefactor'); ?></p>
                             <?php endif; ?>
                             <h4><?php _e('Issued by', 'badgefactor'); ?></h4>
@@ -33,8 +32,10 @@
                         <h3 class="badge-criteria-heading"><?php echo $GLOBALS['badgefactor']->get_badge_criteria_title($post->ID); ?></h3>
                         <?php echo wpautop($GLOBALS['badgefactor']->get_badge_criteria($post->ID)); ?>
 
+                        <?php if ($member): ?>
                         <h3 class="badge-date-heading"><?php _e('Issued on', 'badgefactor'); ?></h3>
                         <span class="badges-unique-granted-date"><?php echo date_i18n('d F Y', strtotime($submission->post_modified)); ?></span>
+                        <?php endif; ?>
                     </div>
                 </section>
             </div>
