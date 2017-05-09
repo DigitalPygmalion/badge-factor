@@ -1,4 +1,10 @@
-<?php $member = isset($wp_query->query_vars['member']) ? $wp_query->query_vars['member'] : null; ?>
+<?php
+    $member = isset($wp_query->query_vars['member']) ? $wp_query->query_vars['member'] : null;
+
+    $submission = $GLOBALS['badgefactor']->get_submission_id($post->ID, $member);
+
+?>
+
 <section class="profile-organisation-badges">
     <div id="post-<?php echo $post->ID; ?>" <?php post_class(); ?>>
         <div class="container single-badge">
@@ -27,7 +33,8 @@
                         <h3 class="badge-criteria-heading"><?php echo $GLOBALS['badgefactor']->get_badge_criteria_title($post->ID); ?></h3>
                         <?php echo wpautop($GLOBALS['badgefactor']->get_badge_criteria($post->ID)); ?>
 
-                        <h3 class="badge-date-heading"><?php _e('Granted on', 'badgefactor'); ?></h3>
+                        <h3 class="badge-date-heading"><?php _e('Issued on', 'badgefactor'); ?></h3>
+                        <span class="badges-unique-granted-date"><?php echo date_i18n('d F Y', strtotime($submission->post_modified)); ?></span>
                     </div>
                 </section>
             </div>

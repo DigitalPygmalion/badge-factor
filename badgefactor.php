@@ -1350,6 +1350,53 @@ class BadgeFactor
 		return null;
 	}
 
+
+    /**
+     * @param $badge_id
+     * @param $user_login
+     * @return mixed
+     */
+	public function get_submission_id($badge_id, $user_login)
+    {
+        $query = new WP_Query([
+            'post_status' => 'publish',
+            'post_type' => 'submission',
+            'author_name' => $user_login,
+            'meta_query' => [
+                [
+                    'key' => '_badgeos_submission_achievement_id',
+                    'value' => $badge_id
+                ]
+            ],
+            'posts_per_page' => 1,
+        ]);
+        $return = $query->get_posts();
+        if (empty($return))
+        {
+            $user = get_user_by('login', $user_login);
+            $query = new WP_Query([
+                'post_status' => 'publish',
+                'post_type' => 'nomination',
+                'meta_query' => [
+                    [
+                        'key' => '_badgeos_nomination_achievement_id',
+                        'value' => $badge_id
+                    ],
+                    [
+                        'key' => '_badgeos_nomination_user_id',
+                        'value' => $user->ID
+                    ]
+                ],
+                'posts_per_page' => 1,
+            ]);
+            $return = $query->get_posts();
+
+        }
+        return array_shift($return);
+
+    }
+
+
     /**
      * @param $submission_id
      * @return false|null|string
