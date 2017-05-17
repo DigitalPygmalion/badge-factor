@@ -1,6 +1,8 @@
 <?php
     $member = isset($wp_query->query_vars['member']) ? get_user_by('login', $wp_query->query_vars['member']) : null;
-    $submission = $member ? $GLOBALS['badgefactor']->get_submission_id($post->ID, $member): null;
+    $submission = $member ? $GLOBALS['badgefactor']->get_submission($post->ID, $member): null;
+
+    $proof = $submission ? $GLOBALS['badgefactor']->get_proof($submission->ID): null;
 
 ?>
 

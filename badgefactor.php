@@ -100,10 +100,11 @@ class BadgeFactor
         add_action( 'add_meta_boxes', array($this, 'add_metabox'), 99);
         add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ) );
         add_action( 'admin_init',     array($this, 'register_badgefactor_settings' ));
+        add_action( 'template_redirect',  array($this, 'parse_member_badge_request' ));
         add_filter( 'acf/load_field/key=field_57ab18ef7b1d2', array($this, 'generate_useful_links'), 10, 1);
         add_filter( 'single_template',  array($this, 'locate_single_templates'));
         add_filter( 'archive_template', array($this, 'locate_archive_templates'), 10, 1);
-        add_filter( 'query_vars', array($this, 'rewrite_add_badge_var'), 10, 1);
+
 
         add_theme_support('post-thumbnails');
         add_image_size('square-140', 140, 140, false);
@@ -901,18 +902,22 @@ class BadgeFactor
         }
     }
 
-    public function rewrite_add_badge_var($vars)
-    {
-        $vars[] = 'member';
-        return $vars;
-    }
-
     public function add_member_badges_page()
     {
         // FIXME not working...
         add_rewrite_tag('%member%', '([^&]+)');
-        add_rewrite_rule('members/([^/]+)/badges/([^/]+)/?$','index.php?badges=$matches[2]&member=$matches[1]','top');
+	    add_rewrite_tag('%badges%', '([^&]+)');
+        add_rewrite_rule('^members/([^/]+)/badges/([^/]+)/?$','index.php?badges=$matches[2]&member=$matches[1]','top');
         flush_rewrite_rules();
+    }
+
+    public function parse_member_badge_request() {
+        //echo get_single_template(); die;
+	    if ( get_query_var( 'member' ) && get_query_var( 'badges' ) ) {
+            add_filter('template_include', function() {
+                return $this->directory_path . '/templates/single-badges.php';
+            });
+        }
 
     }
 
@@ -1137,6 +1142,17 @@ class BadgeFactor
         return get_post($badge_id);
     }
 
+    public function get_badge_id_by_slug($badge_slug) {
+        $args = array(
+            'name'        => $badge_slug,
+            'post_type'   => 'badges',
+            'post_status' => 'publish',
+            'numberposts' => 1
+        );
+        $badge = get_posts($args);
+        return $badge ? $badge[0]->ID : false;
+    }
+
     public function get_nb_badges()
     {
         return count($this->get_badges());
@@ -1227,42 +1243,35 @@ class BadgeFactor
      * @param  integer $userID ID of the user whose achievements to display.
      * @return mixed           echo'd badge loop.
      */
-    public function get_user_achievements ( $userID ) {
+    public function get_user_achievements ( $author_id ) {
 
-        global $wpdb;
+        $achievements = array();
 
-        $api_call = $this->getSslPage(WP_HOME.'/api/badge/achievements/?user_id='.$userID);
-        $api_call = json_decode($api_call);
-        $badges = NULL;
-        $fixed_badges = [];
-        if (NULL !== $api_call && isset($api_call->status) && $api_call->status = 'ok' && isset($api_call->achievements)) {
-            $badges = $api_call->achievements;
+	    //Re-fetch our data if the transient has expired.
+	    if ( false === ( $badges = get_transient( 'custom_badgeos_user_achievements' ) ) ) {
+		    //Grab the user's current list of achievements, by ID
+		    $ids = badgeos_get_user_earned_achievement_ids( $author_id );
 
-
-            foreach ($badges as $badge) {
-                $uid_str = explode("?uid=", $badge->uid);
-                $uid_str = $uid_str[1];
-                $uid = explode ( "-" , $uid_str);
-                $badge_id = $uid[0];
-                $achievement_id = $wpdb->get_var(
-                    $wpdb->prepare(
-                        "SELECT pm.meta_value
-                         FROM {$wpdb->prefix}posts AS p
-                         INNER JOIN {$wpdb->prefix}postmeta AS pm
-                         ON p.ID = pm.post_id
-                         WHERE pm.meta_key = '_badgeos_submission_achievement_id'
-                         AND p.post_status = 'publish'
-                         AND p.ID = %s", $badge_id
-                    )
-                );
-
-                $fixed_badges[$achievement_id] = $badge;
-                $fixed_badges[$achievement_id]->badge_id = $badge_id;
-                $fixed_badges[$achievement_id]->achievement_id = $achievement_id;
-
-            }
-        }
-        return $fixed_badges;
+		    $types = array();
+		    foreach( $ids as $id ) :
+			    //shuffle the badge type into its own array.
+			    $types[] = get_post_type( $id );
+		    endforeach;
+		    //Assign our arguments based on passed in parameters and unique badge types and only earned badges by ID.
+		    $args = array(
+			    'posts_per_page' => -1,
+			    'post_type' => array_unique($types),
+			    'post__in' => $ids
+		    );
+		    $badges = new WP_Query( $args );
+		    //store our resulting WP_Query object in a transient for one hour.
+		    set_transient( 'custom_badgeos_user_achievements', $badges, 60*60 );
+	    }
+	    //Loop through our badges as we would any other post listing, display the parts we want.
+	    if( $badges->have_posts() ) : while( $badges->have_posts() ) : $badges->the_post(); ?>
+            <?php $achievements[] = get_post(); ?>
+	    <?php endwhile; wp_reset_postdata(); endif;
+	    return $achievements;
     }
 
     /**
@@ -1271,38 +1280,17 @@ class BadgeFactor
      * @param  integer $author_id ID of the author to display. Defaults to ID 1
      * @return mixed           echo'd badge loop.
      */
-    function user_achievements( $count = 1, $author_id = 1 ) {
-        //Use the current user if no specific user specified.
-        if ( 1 === absint( $author_id ) ) {
-            global $post;
-            $author_id = $post->post_author;
-        }
+    function user_achievements( $author_id ) {
 
-        //Re-fetch our data if the transient has expired.
-        if ( false === ( $badges = get_transient( 'custom_badgeos_user_achievements' ) ) ) {
-            //Grab the user's current list of achievements, by ID
-            $ids = badgeos_get_user_earned_achievement_ids( $author_id );
+        $achievements = $this->get_user_achievements($author_id);
 
-            $types = array();
-            foreach( $ids as $id ) :
-                //shuffle the badge type into its own array.
-                $types[] = get_post_type( $id );
-            endforeach;
-            //Assign our arguments based on passed in parameters and unique badge types and only earned badges by ID.
-            $args = array(
-                'posts_per_page' => $count,
-                'post_type' => array_unique($types),
-                'post__in' => $ids
-            );
-            $badges = new WP_Query( $args );
-            //store our resulting WP_Query object in a transient for one hour.
-            set_transient( 'custom_badgeos_user_achievements', $badges, 60*60 );
+        foreach ( $achievements as $post) {
+	        echo badgeos_get_achievement_post_thumbnail();
+	        echo "<span class='badgeos-title-wrap'>";
+	        the_title();
+	        echo "</span>";
+
         }
-        //Loop through our badges as we would any other post listing, display the parts we want.
-        if( $badges->have_posts() ) : while( $badges->have_posts() ) : $badges->the_post(); ?>
-            <?php echo badgeos_get_achievement_post_thumbnail(); ?>
-            <span class="badgeos-title-wrap"><?php the_title(); ?></span>
-        <?php endwhile; wp_reset_postdata(); endif;
     }
 
     /**
@@ -1356,7 +1344,7 @@ class BadgeFactor
      * @param $user_login
      * @return mixed
      */
-	public function get_submission_id($badge_id, $wp_user)
+	public function get_submission($badge_id, $wp_user)
     {
         $query = new WP_Query([
             'post_status' => 'publish',
@@ -1395,8 +1383,43 @@ class BadgeFactor
 
     }
 
+    public function get_proof($submission_id) {
+        global $wpdb;
+
+        $row = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT pdf.form_id AS form_id,
+                         pdfm.display_meta AS form_meta,
+                         pdf.lead_id AS lead_id
+                         FROM {$wpdb->prefix}rg_lead_detail AS pdf
+                         INNER JOIN {$wpdb->prefix}postmeta AS pm
+                         ON pdf.value = pm.meta_value
+                         INNER JOIN {$wpdb->prefix}posts AS p
+                         ON p.ID = pm.post_id
+                         INNER JOIN {$wpdb->prefix}rg_form_meta AS pdfm
+                         ON pdf.form_id = pdfm.form_id
+                         WHERE p.post_status = 'publish'
+                         AND pm.meta_key = '_badgeos_submission_achievement_id'
+                         AND pm.post_id = %s", $submission_id
+            )
+        );
+
+        /*
+        echo "<pre>";
+
+        print_r($row);
+        $pdf_meta = json_decode($row->form_meta);
+
+
+        $pdf_id = (array)($pdf_meta->gfpdf_form_settings);
+        print_r($pdf_id); die;
+*/
+
+        //GPDFAPI::get_pdf($row->form_id, unshift($pdf_id)->id);
+    }
 
     /**
+     * @deprecated
      * @param $submission_id
      * @return false|null|string
      */
@@ -1434,8 +1457,10 @@ class BadgeFactor
     public function is_achievement_private($submission_id)
     {
         $post = get_post($submission_id);
-        if ($post->post_type != 'submission')
-            die();
+        if (!in_array($post->post_type, ['submission', 'nomination']))
+        {
+            return true;
+        }
 
         $public = true;
         $status = get_post_meta($submission_id, 'public');
