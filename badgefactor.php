@@ -105,6 +105,10 @@ class BadgeFactor
         add_filter( 'archive_template', array($this, 'locate_archive_templates'), 10, 1);
         add_filter( 'query_vars', array($this, 'rewrite_add_badge_var'), 10, 1);
 
+	    add_action( 'wp_enqueue_scripts', array($this, 'badgefactor_scripts') );
+	    add_action( 'wp_ajax_nopriv_toggle-private-status', array($this, 'ajax_toggle_private_status') );
+	    add_action( 'wp_ajax_toggle-private-status', array($this, 'ajax_toggle_private_status') );
+
         add_theme_support('post-thumbnails');
         add_image_size('square-140', 140, 140, false);
         add_image_size('square-225', 225, 225, false);
@@ -1525,7 +1529,8 @@ class BadgeFactor
      * Get the Buddypress login page.
      * @return bool
      */
-    public function bf_login_page(){
+    public function bf_login_page()
+    {
         //Get the bf-pages option, deserialize this information and get the id related to the register key.
 
         $bf_pages = get_option('bp-pages');
@@ -1543,6 +1548,34 @@ class BadgeFactor
         }
 
         return $return;
+    }
+
+
+	/**
+	 *
+	 */
+	public function ajax_toggle_private_status()
+    {
+		$nonce = $_POST['nonce'];
+		if ( ! wp_verify_nonce( $nonce, 'myajax-nonce' ) )
+		{
+			die();
+		}
+
+		$achievement_id = $_POST['achievement_id'];
+		$new_status = $GLOBALS['badgefactor']->toggle_private_status($achievement_id);
+
+		$response = json_encode( array( 'success' => true, 'status' => $new_status) );
+		header( "Content-Type: application/json" );
+		echo $response;
+
+		exit;
+	}
+
+
+	public function badgefactor_scripts()
+    {
+	    wp_register_script( 'badgefactor-script', plugins_url( '/assets/js/bf.js', __FILE__ ) );
     }
 
 }
