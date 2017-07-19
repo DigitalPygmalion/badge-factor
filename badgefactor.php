@@ -2,6 +2,7 @@
 /**
  * Plugin Name: Badge Factor
  * Plugin URI: https://github.com/DigitalPygmalion/badge-factor
+ * GitHub Plugin URI: DigitalPygmalion/badge-factor
  * Description: Badge Factor is a "glue" plugin which brings together many different plugins in order to deliver a comprehensive open badge solution.
  * Author: Digital Pygmalion
  * Version: 1.0.0
