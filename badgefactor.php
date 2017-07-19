@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: Badge Factor
- * Plugin URI: https://github.com/ctrlwebinc/badge-factor
+ * Plugin URI: https://github.com/DigitalPygmalion/badge-factor
  * Description: Badge Factor is a "glue" plugin which brings together many different plugins in order to deliver a comprehensive open badge solution.
- * Author: ctrlweb
+ * Author: Digital Pygmalion
  * Version: 1.0.0
- * Author URI: https://ctrlweb.ca/
+ * Author URI: http://digitalpygmalion.com/
  * License: MIT
  * Text Domain: badgefactor
  * Domain Path: /languages
