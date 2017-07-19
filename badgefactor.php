@@ -1107,10 +1107,18 @@ class BadgeFactor
         switch ($post->post_type)
         {
             case 'organisation':
-                $template = $this->plugin_path() . '/templates/single-organisation.php';
+                if(file_exists(get_template_directory() . '/templates/single-organisation.php')){
+		    $template = get_template_directory() . '/templates/single-organisation.php';
+		} else {
+                    $template = $this->plugin_path() . '/templates/single-organisation.php';
+		}
                 break;
             case 'badges':
-                $template = $this->plugin_path() . '/templates/single-badges.php';
+                if(file_exists(get_template_directory() . '/templates/single-badges.php')){
+		    $template = get_template_directory() . '/templates/single-badges.php';
+		} else {
+                    $template = $this->plugin_path() . '/templates/single-badges.php';
+		}
                 break;
             default:
                 $template = null;
