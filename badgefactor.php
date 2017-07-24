@@ -920,7 +920,11 @@ class BadgeFactor
         //echo get_single_template(); die;
 	    if ( get_query_var( 'member' ) && get_query_var( 'badges' ) ) {
             add_filter('template_include', function() {
-                return $this->directory_path . '/templates/single-badges.php';
+                if(file_exists(get_template_directory() . '/templates/single-badges.php')){
+                    return get_template_directory() . '/templates/single-badges.php';
+                } else {
+                    return $this->directory_path . '/templates/single-badges.php';
+                }
             });
         }
 
