@@ -16,7 +16,7 @@ Here is the list of plugins needed and the links to their repository or project 
 - GravityForms : [gravityforms][3]
 - Advanced custom fields : [ACF][4]
 
-##Structure
+## Structure
 
     Badgefactor
     |-languages ( Only french translations for the moment)
