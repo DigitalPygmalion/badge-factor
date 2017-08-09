@@ -1,11 +1,12 @@
 <?php
 /**
  * Plugin Name: Badge Factor
- * Plugin URI: https://github.com/ctrlwebinc/badge-factor
+ * Plugin URI: https://github.com/DigitalPygmalion/badge-factor
+ * GitHub Plugin URI: mediaformat/badge-factor
  * Description: Badge Factor is a "glue" plugin which brings together many different plugins in order to deliver a comprehensive open badge solution.
- * Author: ctrlweb
- * Version: 1.0.0
- * Author URI: https://ctrlweb.ca/
+ * Author: Digital Pygmalion
+ * Version: 1.0.1
+ * Author URI: http://digitalpygmalion.com/
  * License: MIT
  * Text Domain: badgefactor
  * Domain Path: /languages
@@ -919,7 +920,11 @@ class BadgeFactor
         //echo get_single_template(); die;
 	    if ( get_query_var( 'member' ) && get_query_var( 'badges' ) ) {
             add_filter('template_include', function() {
-                return $this->directory_path . '/templates/single-badges.php';
+                if(file_exists(get_template_directory() . '/templates/single-badges.php')){
+                    return get_template_directory() . '/templates/single-badges.php';
+                } else {
+                    return $this->directory_path . '/templates/single-badges.php';
+                }
             });
         }
 
@@ -1116,10 +1121,18 @@ class BadgeFactor
         switch ($post->post_type)
         {
             case 'organisation':
-                $template = $this->plugin_path() . '/templates/single-organisation.php';
+                if(file_exists(get_template_directory() . '/templates/single-organisation.php')){
+		    $template = get_template_directory() . '/templates/single-organisation.php';
+		} else {
+                    $template = $this->plugin_path() . '/templates/single-organisation.php';
+		}
                 break;
             case 'badges':
-                $template = $this->plugin_path() . '/templates/single-badges.php';
+                if(file_exists(get_template_directory() . '/templates/single-badges.php')){
+		    $template = get_template_directory() . '/templates/single-badges.php';
+		} else {
+                    $template = $this->plugin_path() . '/templates/single-badges.php';
+		}
                 break;
             default:
                 $template = null;
