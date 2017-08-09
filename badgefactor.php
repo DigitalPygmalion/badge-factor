@@ -920,7 +920,11 @@ class BadgeFactor
         //echo get_single_template(); die;
 	    if ( get_query_var( 'member' ) && get_query_var( 'badges' ) ) {
             add_filter('template_include', function() {
-                return $this->directory_path . '/templates/single-badges.php';
+                if(file_exists(get_template_directory() . '/templates/single-badges.php')){
+                    return get_template_directory() . '/templates/single-badges.php';
+                } else {
+                    return $this->directory_path . '/templates/single-badges.php';
+                }
             });
         }
 
@@ -1117,10 +1121,18 @@ class BadgeFactor
         switch ($post->post_type)
         {
             case 'organisation':
-                $template = $this->plugin_path() . '/templates/single-organisation.php';
+                if(file_exists(get_template_directory() . '/templates/single-organisation.php')){
+		    $template = get_template_directory() . '/templates/single-organisation.php';
+		} else {
+                    $template = $this->plugin_path() . '/templates/single-organisation.php';
+		}
                 break;
             case 'badges':
-                $template = $this->plugin_path() . '/templates/single-badges.php';
+                if(file_exists(get_template_directory() . '/templates/single-badges.php')){
+		    $template = get_template_directory() . '/templates/single-badges.php';
+		} else {
+                    $template = $this->plugin_path() . '/templates/single-badges.php';
+		}
                 break;
             default:
                 $template = null;
@@ -1253,7 +1265,10 @@ class BadgeFactor
         $achievements = array();
 
 	    //Re-fetch our data if the transient has expired.
-	    if ( false === ( $badges = get_transient( 'custom_badgeos_user_achievements' ) ) ) {
+	    if ( false 
+          
+          
+          ( $badges = get_transient( 'custom_badgeos_user_achievements' ) ) ) {
 		    //Grab the user's current list of achievements, by ID
 		    $ids = badgeos_get_user_earned_achievement_ids( $author_id );
 
