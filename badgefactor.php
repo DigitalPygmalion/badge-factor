@@ -2,10 +2,10 @@
 /**
  * Plugin Name: Badge Factor
  * Plugin URI: https://github.com/DigitalPygmalion/badge-factor
- * GitHub Plugin URI: mediaformat/badge-factor
+ * GitHub Plugin URI: DigitalPygmalion/badge-factor
  * Description: Badge Factor is a "glue" plugin which brings together many different plugins in order to deliver a comprehensive open badge solution.
  * Author: Digital Pygmalion
- * Version: 1.0.1
+ * Version: 1.0.0
  * Author URI: http://digitalpygmalion.com/
  * License: MIT
  * Text Domain: badgefactor
@@ -1265,7 +1265,10 @@ class BadgeFactor
         $achievements = array();
 
 	    //Re-fetch our data if the transient has expired.
-	    if ( false === ( $badges = get_transient( 'custom_badgeos_user_achievements' ) ) ) {
+	    if ( false 
+          
+          
+          ( $badges = get_transient( 'custom_badgeos_user_achievements' ) ) ) {
 		    //Grab the user's current list of achievements, by ID
 		    $ids = badgeos_get_user_earned_achievement_ids( $author_id );
 
