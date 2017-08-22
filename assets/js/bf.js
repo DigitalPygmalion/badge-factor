@@ -7,7 +7,7 @@
                     achievement_id: button.data('achievement-id'),
                     nonce: MyAjax.nonce },
                 function(response) {
-                    if (response.success) {
+                    if (response.success && response.status !== false) {
                         button.removeClass('public').removeClass('private').addClass(response.status);
                         if (response.status == 'private') {
                             button.find('.glyphicon').removeClass('glyphicon-eye-open').addClass('glyphicon-eye-close');

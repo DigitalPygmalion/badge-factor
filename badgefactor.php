@@ -1264,29 +1264,22 @@ class BadgeFactor
 
         $achievements = array();
 
-	    //Re-fetch our data if the transient has expired.
-	    if ( false 
-          
-          
-          ( $badges = get_transient( 'custom_badgeos_user_achievements' ) ) ) {
-		    //Grab the user's current list of achievements, by ID
-		    $ids = badgeos_get_user_earned_achievement_ids( $author_id );
+        //Grab the user's current list of achievements, by ID
+        $ids = badgeos_get_user_earned_achievement_ids( $author_id );
 
-		    $types = array();
-		    foreach( $ids as $id ) :
-			    //shuffle the badge type into its own array.
-			    $types[] = get_post_type( $id );
-		    endforeach;
-		    //Assign our arguments based on passed in parameters and unique badge types and only earned badges by ID.
-		    $args = array(
-			    'posts_per_page' => -1,
-			    'post_type' => array_unique($types),
-			    'post__in' => $ids
-		    );
-		    $badges = new WP_Query( $args );
-		    //store our resulting WP_Query object in a transient for one hour.
-		    set_transient( 'custom_badgeos_user_achievements', $badges, 60*60 );
-	    }
+        $types = array();
+        foreach( $ids as $id ) :
+            //shuffle the badge type into its own array.
+            $types[] = get_post_type( $id );
+        endforeach;
+        //Assign our arguments based on passed in parameters and unique badge types and only earned badges by ID.
+        $args = array(
+            'posts_per_page' => -1,
+            'post_type' => array_unique($types),
+            'post__in' => $ids
+        );
+        $badges = new WP_Query( $args );
+
 	    //Loop through our badges as we would any other post listing, display the parts we want.
 	    if( $badges->have_posts() ) : while( $badges->have_posts() ) : $badges->the_post(); ?>
             <?php $achievements[] = get_post(); ?>
