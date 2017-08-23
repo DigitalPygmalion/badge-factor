@@ -909,7 +909,6 @@ class BadgeFactor
 
     public function add_member_badges_page()
     {
-        // FIXME not working...
         add_rewrite_tag('%member%', '([^&]+)');
 	    add_rewrite_tag('%badges%', '([^&]+)');
         add_rewrite_rule('^members/([^/]+)/badges/([^/]+)/?$','index.php?badges=$matches[2]&member=$matches[1]','top');
