@@ -1122,17 +1122,17 @@ class BadgeFactor
         {
             case 'organisation':
                 if(file_exists(get_template_directory() . '/templates/single-organisation.php')){
-		    $template = get_template_directory() . '/templates/single-organisation.php';
-		} else {
-                    $template = $this->plugin_path() . '/templates/single-organisation.php';
-		}
+                    $template = get_template_directory() . '/templates/single-organisation.php';
+                } else {
+                            $template = $this->plugin_path() . '/templates/single-organisation.php';
+                }
                 break;
             case 'badges':
                 if(file_exists(get_template_directory() . '/templates/single-badges.php')){
-		    $template = get_template_directory() . '/templates/single-badges.php';
-		} else {
-                    $template = $this->plugin_path() . '/templates/single-badges.php';
-		}
+		            $template = get_template_directory() . '/templates/single-badges.php';
+                } else {
+                            $template = $this->plugin_path() . '/templates/single-badges.php';
+                }
                 break;
             default:
                 $template = null;
@@ -1214,6 +1214,12 @@ class BadgeFactor
     {
         return get_permalink(get_field('badgefactor_page_id', $badge_id));
     }
+
+	public function badge_has_criteria($badge_id)
+	{
+		return !empty(get_field('badge_criteria', $badge_id));
+
+	}
 
     public function get_badge_criteria_title($badge_id)
     {
@@ -1335,6 +1341,18 @@ class BadgeFactor
         curl_close($ch);
         return $result;
     }
+
+	public function get_badge_by_submission($submission)
+	{
+		$badge = false;
+		$badge_id = get_post_meta($submission->ID, '_badgeos_submission_achievement_id');
+		$badge_id = is_array($badge_id) ? $badge_id[0] : $badge_id;
+		if ($badge_id)
+		{
+			$badge = get_post($badge_id);
+		}
+		return $badge;
+	}
 
     /**
      * @param $page_slug
