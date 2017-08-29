@@ -1267,29 +1267,15 @@ class BadgeFactor
      */
     public function get_user_achievements ( $author_id ) {
 
-        $achievements = array();
+	    $achievements_query = [
+		    'posts_per_page' => -1,
+		    'post_type' => ['submission', 'nomination'],
+		    'author' => $author_id
+	    ];
 
-        //Grab the user's current list of achievements, by ID
-        $ids = badgeos_get_user_earned_achievement_ids( $author_id );
+	    $achievements = new WP_Query($achievements_query);
 
-        $types = array();
-        foreach( $ids as $id ) :
-            //shuffle the badge type into its own array.
-            $types[] = get_post_type( $id );
-        endforeach;
-        //Assign our arguments based on passed in parameters and unique badge types and only earned badges by ID.
-        $args = array(
-            'posts_per_page' => -1,
-            'post_type' => array_unique($types),
-            'post__in' => $ids
-        );
-        $badges = new WP_Query( $args );
-
-	    //Loop through our badges as we would any other post listing, display the parts we want.
-	    if( $badges->have_posts() ) : while( $badges->have_posts() ) : $badges->the_post(); ?>
-            <?php $achievements[] = get_post(); ?>
-	    <?php endwhile; wp_reset_postdata(); endif;
-	    return $achievements;
+	    return $achievements->get_posts();
     }
 
     /**
@@ -1341,15 +1327,31 @@ class BadgeFactor
         return $result;
     }
 
+
+	/**
+     * Returns badge associated with submission passed in parameter.
+     * If variable passed in parameter is a badge and not a submission, it will return it.
+	 * @param $submission
+	 * @return bool|WP_Post
+	 */
 	public function get_badge_by_submission($submission)
 	{
-		$badge = false;
-		$badge_id = get_post_meta($submission->ID, '_badgeos_submission_achievement_id');
-		$badge_id = is_array($badge_id) ? $badge_id[0] : $badge_id;
-		if ($badge_id)
+        $badge = false;
+		if ($submission->post_type == 'submission')
 		{
-			$badge = get_post($badge_id);
+			$badge_id = get_post_meta($submission->ID, '_badgeos_submission_achievement_id');
+			$badge_id = is_array($badge_id) ? $badge_id[0] : $badge_id;
+			if ($badge_id)
+			{
+				$badge = get_post($badge_id);
+			}
 		}
+		else if ($submission->post_type == 'badges')
+		{
+			$badge = $submission;
+
+		}
+
 		return $badge;
 	}
 
@@ -1416,9 +1418,11 @@ class BadgeFactor
     public function get_proof($submission_id) {
         global $wpdb;
 
-        $row = $wpdb->get_row(
-            $wpdb->prepare(
-                "SELECT pdf.form_id AS form_id,
+	    if ( class_exists( 'GFCommon' ))
+        {
+	        $row = $wpdb->get_row(
+		        $wpdb->prepare(
+			        "SELECT pdf.form_id AS form_id,
                          pdfm.display_meta AS form_meta,
                          pdf.lead_id AS lead_id
                          FROM {$wpdb->prefix}rg_lead_detail AS pdf
@@ -1431,21 +1435,29 @@ class BadgeFactor
                          WHERE p.post_status = 'publish'
                          AND pm.meta_key = '_badgeos_submission_achievement_id'
                          AND pm.post_id = %s", $submission_id
-            )
-        );
+		        )
+	        );
+	        // FIXME GravityForms will not work if this is not fixed... :(
+	        /*
+			echo "<pre>";
 
-        /*
-        echo "<pre>";
-
-        print_r($row);
-        $pdf_meta = json_decode($row->form_meta);
+			print_r($row);
+			$pdf_meta = json_decode($row->form_meta);
 
 
-        $pdf_id = (array)($pdf_meta->gfpdf_form_settings);
-        print_r($pdf_id); die;
-*/
+			$pdf_id = (array)($pdf_meta->gfpdf_form_settings);
+			print_r($pdf_id); die;
+        	*/
 
-        //GPDFAPI::get_pdf($row->form_id, unshift($pdf_id)->id);
+	        //GPDFAPI::get_pdf($row->form_id, unshift($pdf_id)->id);
+
+        }
+        else
+        {
+
+        }
+
+
     }
 
     /**
