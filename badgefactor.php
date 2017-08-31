@@ -2,10 +2,10 @@
 /**
  * Plugin Name: Badge Factor
  * Plugin URI: https://github.com/DigitalPygmalion/badge-factor
- * GitHub Plugin URI: mediaformat/badge-factor
+ * GitHub Plugin URI: DigitalPygmalion/badge-factor
  * Description: Badge Factor is a "glue" plugin which brings together many different plugins in order to deliver a comprehensive open badge solution.
  * Author: Digital Pygmalion
- * Version: 1.0.1
+ * Version: 1.0.0
  * Author URI: http://digitalpygmalion.com/
  * License: MIT
  * Text Domain: badgefactor
@@ -909,7 +909,6 @@ class BadgeFactor
 
     public function add_member_badges_page()
     {
-        // FIXME not working...
         add_rewrite_tag('%member%', '([^&]+)');
 	    add_rewrite_tag('%badges%', '([^&]+)');
         add_rewrite_rule('^members/([^/]+)/badges/([^/]+)/?$','index.php?badges=$matches[2]&member=$matches[1]','top');
@@ -1122,17 +1121,17 @@ class BadgeFactor
         {
             case 'organisation':
                 if(file_exists(get_template_directory() . '/templates/single-organisation.php')){
-		    $template = get_template_directory() . '/templates/single-organisation.php';
-		} else {
-                    $template = $this->plugin_path() . '/templates/single-organisation.php';
-		}
+                    $template = get_template_directory() . '/templates/single-organisation.php';
+                } else {
+                            $template = $this->plugin_path() . '/templates/single-organisation.php';
+                }
                 break;
             case 'badges':
                 if(file_exists(get_template_directory() . '/templates/single-badges.php')){
-		    $template = get_template_directory() . '/templates/single-badges.php';
-		} else {
-                    $template = $this->plugin_path() . '/templates/single-badges.php';
-		}
+		            $template = get_template_directory() . '/templates/single-badges.php';
+                } else {
+                            $template = $this->plugin_path() . '/templates/single-badges.php';
+                }
                 break;
             default:
                 $template = null;
@@ -1215,6 +1214,12 @@ class BadgeFactor
         return get_permalink(get_field('badgefactor_page_id', $badge_id));
     }
 
+	public function badge_has_criteria($badge_id)
+	{
+		return !empty(get_field('badge_criteria', $badge_id));
+
+	}
+
     public function get_badge_criteria_title($badge_id)
     {
         return get_field('badge_criteria_title', $badge_id);
@@ -1262,33 +1267,15 @@ class BadgeFactor
      */
     public function get_user_achievements ( $author_id ) {
 
-        $achievements = array();
+	    $achievements_query = [
+		    'posts_per_page' => -1,
+		    'post_type' => ['submission', 'nomination'],
+		    'author' => $author_id
+	    ];
 
-	    //Re-fetch our data if the transient has expired.
-	    if ( false === ( $badges = get_transient( 'custom_badgeos_user_achievements' ) ) ) {
-		    //Grab the user's current list of achievements, by ID
-		    $ids = badgeos_get_user_earned_achievement_ids( $author_id );
+	    $achievements = new WP_Query($achievements_query);
 
-		    $types = array();
-		    foreach( $ids as $id ) :
-			    //shuffle the badge type into its own array.
-			    $types[] = get_post_type( $id );
-		    endforeach;
-		    //Assign our arguments based on passed in parameters and unique badge types and only earned badges by ID.
-		    $args = array(
-			    'posts_per_page' => -1,
-			    'post_type' => array_unique($types),
-			    'post__in' => $ids
-		    );
-		    $badges = new WP_Query( $args );
-		    //store our resulting WP_Query object in a transient for one hour.
-		    set_transient( 'custom_badgeos_user_achievements', $badges, 60*60 );
-	    }
-	    //Loop through our badges as we would any other post listing, display the parts we want.
-	    if( $badges->have_posts() ) : while( $badges->have_posts() ) : $badges->the_post(); ?>
-            <?php $achievements[] = get_post(); ?>
-	    <?php endwhile; wp_reset_postdata(); endif;
-	    return $achievements;
+	    return $achievements->get_posts();
     }
 
     /**
@@ -1339,6 +1326,34 @@ class BadgeFactor
         curl_close($ch);
         return $result;
     }
+
+
+	/**
+     * Returns badge associated with submission passed in parameter.
+     * If variable passed in parameter is a badge and not a submission, it will return it.
+	 * @param $submission
+	 * @return bool|WP_Post
+	 */
+	public function get_badge_by_submission($submission)
+	{
+        $badge = false;
+		if ($submission->post_type == 'submission')
+		{
+			$badge_id = get_post_meta($submission->ID, '_badgeos_submission_achievement_id');
+			$badge_id = is_array($badge_id) ? $badge_id[0] : $badge_id;
+			if ($badge_id)
+			{
+				$badge = get_post($badge_id);
+			}
+		}
+		else if ($submission->post_type == 'badges')
+		{
+			$badge = $submission;
+
+		}
+
+		return $badge;
+	}
 
     /**
      * @param $page_slug
@@ -1403,9 +1418,11 @@ class BadgeFactor
     public function get_proof($submission_id) {
         global $wpdb;
 
-        $row = $wpdb->get_row(
-            $wpdb->prepare(
-                "SELECT pdf.form_id AS form_id,
+	    if ( class_exists( 'GFCommon' ))
+        {
+	        $row = $wpdb->get_row(
+		        $wpdb->prepare(
+			        "SELECT pdf.form_id AS form_id,
                          pdfm.display_meta AS form_meta,
                          pdf.lead_id AS lead_id
                          FROM {$wpdb->prefix}rg_lead_detail AS pdf
@@ -1418,21 +1435,29 @@ class BadgeFactor
                          WHERE p.post_status = 'publish'
                          AND pm.meta_key = '_badgeos_submission_achievement_id'
                          AND pm.post_id = %s", $submission_id
-            )
-        );
+		        )
+	        );
+	        // FIXME GravityForms will not work if this is not fixed... :(
+	        /*
+			echo "<pre>";
 
-        /*
-        echo "<pre>";
-
-        print_r($row);
-        $pdf_meta = json_decode($row->form_meta);
+			print_r($row);
+			$pdf_meta = json_decode($row->form_meta);
 
 
-        $pdf_id = (array)($pdf_meta->gfpdf_form_settings);
-        print_r($pdf_id); die;
-*/
+			$pdf_id = (array)($pdf_meta->gfpdf_form_settings);
+			print_r($pdf_id); die;
+        	*/
 
-        //GPDFAPI::get_pdf($row->form_id, unshift($pdf_id)->id);
+	        //GPDFAPI::get_pdf($row->form_id, unshift($pdf_id)->id);
+
+        }
+        else
+        {
+
+        }
+
+
     }
 
     /**
@@ -1614,6 +1639,11 @@ class BadgeFactor
 	public function badgefactor_scripts()
     {
 	    wp_register_script( 'badgefactor-script', plugins_url( '/assets/js/bf.js', __FILE__ ) );
+	    wp_enqueue_script( 'badgefactor-script' );
+	    wp_localize_script('badgefactor-script', 'MyAjax', array(
+		    'url' => admin_url( 'admin-ajax.php'),
+		    'nonce' => wp_create_nonce('myajax-nonce'),
+	    ));
     }
 
 }
