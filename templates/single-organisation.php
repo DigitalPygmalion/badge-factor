@@ -1,7 +1,7 @@
 <?php get_template_part('templates/page', 'header'); ?>
 
 <div class="profile-organisation-intro">
-    <?php echo $organisation->post_content; ?>
+    <?php echo wpautop($post->post_content); ?>
 </div>
 
 <section class="profile-members-badges">
