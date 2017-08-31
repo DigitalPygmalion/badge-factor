@@ -908,17 +908,16 @@ class BadgeFactor
         }
     }
 
-    public function submission_rewrite_bp_uri() 
+    public function submission_rewrite_bp_uri($path)
     {
-        global $wp;
-        $url_part = add_query_arg(array(),$wp->request);
-        $path_segments = explode('/', trim($url_part, '/'));
         $members_page_slug = str_replace(home_url()."/", '', get_permalink(get_option('bp-pages')['members']));
-        $members_badge_slug = "badges";  
-        if( preg_match("#{$members_page_slug}(.*)/{$members_badge_slug}/(.*)#", $wp->request) ) {
-            return 'members/' . $path_segments[1] . '/badges/' . $path_segments[3];
+        $members_badge_slug = "badges";
+        if( preg_match("#{$members_page_slug}(.*)/{$members_badge_slug}/(.*)#", $path) ) {
+	    global $wp;
+	    $path = $wp->request;
+	    return $path;
         }
-        return $wp->request;
+        return $path;
     }
 	
     public function add_member_badges_page()
