@@ -105,6 +105,7 @@ class BadgeFactor
         add_filter( 'acf/load_field/key=field_57ab18ef7b1d2', array($this, 'generate_useful_links'), 10, 1);
         add_filter( 'single_template',  array($this, 'locate_single_templates'));
         add_filter( 'archive_template', array($this, 'locate_archive_templates'), 10, 1);
+	add_filter( 'bp_uri', array($this, 'submission_rewrite_bp_uri'));
 
 
 	    add_action( 'wp_enqueue_scripts', array($this, 'badgefactor_scripts') );
@@ -907,6 +908,18 @@ class BadgeFactor
         }
     }
 
+    public function submission_rewrite_bp_uri($path)
+    {
+        $members_page_slug = str_replace(home_url()."/", '', get_permalink(get_option('bp-pages')['members']));
+        $members_badge_slug = "badges";
+        if( preg_match("#{$members_page_slug}(.*)/{$members_badge_slug}/(.*)#", $path) ) {
+	    global $wp;
+	    $path = $wp->request;
+	    return $path;
+        }
+        return $path;
+    }
+	
     public function add_member_badges_page()
     {
         add_rewrite_tag('%member%', '([^&]+)');
