@@ -1,4 +1,4 @@
-<?php get_template_part('templates/page', 'header'); ?>
+<?php get_header(); ?>
 
 <div class="profile-organisation-intro">
     <?php echo wpautop($post->post_content); ?>
