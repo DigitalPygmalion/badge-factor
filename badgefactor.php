@@ -1557,9 +1557,9 @@ class BadgeFactor
     public function set_achievement_private($submission_id)
     {
         $post = get_post($submission_id);
-        if ($post->post_type != 'submission' || $post->post_author != get_current_user_id())
+        if ($post->post_type != 'submission' || $post->post_author != get_current_user_id()){
             return FALSE;
-
+	}
         return update_post_meta($submission_id, 'public', false);
     }
 
@@ -1571,9 +1571,9 @@ class BadgeFactor
     public function set_achievement_public($submission_id)
     {
         $post = get_post($submission_id);
-        if ($post->post_type != 'submission' || $post->post_author != get_current_user_id())
+        if ($post->post_type != 'submission' || $post->post_author != get_current_user_id()){
             return FALSE;
-
+	}
         return update_post_meta($submission_id, 'public', true);
     }
 
@@ -1585,9 +1585,9 @@ class BadgeFactor
     public function toggle_private_status($submission_id)
     {
         $post = get_post($submission_id);
-        if ($post->post_type != 'submission' || $post->post_author != get_current_user_id())
+        if ($post->post_type != 'submission' || $post->post_author != get_current_user_id()){
             return FALSE;
-
+	}
         $new_status = 'public';
         if ($this->is_achievement_private($submission_id))
         {
