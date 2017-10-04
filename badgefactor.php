@@ -1210,6 +1210,12 @@ class BadgeFactor
         if (function_exists('badgeos_get_achievement_earners_list'))
         {
             $result = badgeos_get_achievement_earners($badge_id);
+
+            foreach($result as $key => $earner){
+                $submission = $this->get_submission($badge_id, $earner->ID);
+                if ($this->is_achievement_private($submission->ID))
+                    unset($result[$key]);
+            }
         }
         return $result;
 
