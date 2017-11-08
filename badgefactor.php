@@ -132,7 +132,7 @@ class BadgeFactor
         $credly_settings = (array) get_option( 'credly_settings', array() );
 
 
-        $credly_settings['credly_enable']                      = 'false';
+        $credly_settings['credly_enable']                      = false;
         $credly_settings['credly_badge_title']                 = 'post_title';
         $credly_settings['credly_badge_description']           = 'post_body';
         $credly_settings['credly_badge_short_description']     = 'post_excerpt';
@@ -140,7 +140,7 @@ class BadgeFactor
         $credly_settings['credly_badge_image']                 = 'featured_image';
         $credly_settings['credly_badge_testimonial']           = 'congratulations_text';
         $credly_settings['credly_badge_evidence']              = 'permalink';
-        $credly_settings['credly_badge_sendemail_add_message'] = 'false';
+        $credly_settings['credly_badge_sendemail_add_message'] = false;
         update_option( 'credly_settings', $credly_settings );
 
         flush_rewrite_rules();
