@@ -88,7 +88,6 @@ class BadgeFactor
         // Activation / deactivation hooks
         register_activation_hook(__FILE__, array($this, 'activate'));
         register_deactivation_hook(__FILE__, array($this, 'deactivate'));
-
         // Hook declaration
         add_action( 'init', array($this, 'create_cpt_organisation'));
         add_action( 'init', array($this, 'create_cpt_badge'));
@@ -105,7 +104,7 @@ class BadgeFactor
         add_filter( 'acf/load_field/key=field_57ab18ef7b1d2', array($this, 'generate_useful_links'), 10, 1);
         add_filter( 'single_template',  array($this, 'locate_single_templates'));
         add_filter( 'archive_template', array($this, 'locate_archive_templates'), 10, 1);
-	add_filter( 'bp_uri', array($this, 'submission_rewrite_bp_uri'));
+	    add_filter( 'bp_uri', array($this, 'submission_rewrite_bp_uri'));
 
 
 	    add_action( 'wp_enqueue_scripts', array($this, 'badgefactor_scripts') );
@@ -326,7 +325,7 @@ class BadgeFactor
         }
 
         $field['message'] = $message;
-        
+
         return $field;
     }
 
@@ -415,6 +414,8 @@ class BadgeFactor
                     }
                 }
             }
+
+            do_action('badgefactor_woocommerce_create_badge', $ID, $post);
 
             if (get_post_meta( $ID, 'badgefactor_page_id', true) == '')
             {
@@ -919,7 +920,7 @@ class BadgeFactor
         }
         return $path;
     }
-	
+
     public function add_member_badges_page()
     {
         add_rewrite_tag('%member%', '([^&]+)');
@@ -931,7 +932,7 @@ class BadgeFactor
     public function parse_member_badge_request() {
         //echo get_single_template(); die;
 	    if ( get_query_var( 'member' ) && get_query_var( 'badges' ) ) {
-            
+
 		$url = $_SERVER['REQUEST_URI'];
 		$segments = explode('/', parse_url($url, PHP_URL_PATH));
 		$badge_slug = $segments[4];
@@ -941,7 +942,7 @@ class BadgeFactor
 		if (($user->ID != wp_get_current_user()->ID && $GLOBALS['badgefactor']->is_achievement_private($submission->ID) === true)){
 			$user_path = '/' . $segments[1]. '/' . $segments[2];
 			wp_safe_redirect( $user_path );
-		}    
+		}
 		add_filter('template_include', function() {
                 if(file_exists(get_template_directory() . '/templates/single-badges.php')){
                     return get_template_directory() . '/templates/single-badges.php';
@@ -1147,14 +1148,14 @@ class BadgeFactor
                 if(file_exists(get_template_directory() . '/templates/single-organisation.php')){
                     $template = get_template_directory() . '/templates/single-organisation.php';
                 } else {
-                            $template = $this->plugin_path() . '/templates/single-organisation.php';
+                    $template = $this->plugin_path() . '/templates/single-organisation.php';
                 }
                 break;
             case 'badges':
                 if(file_exists(get_template_directory() . '/templates/single-badges.php')){
 		            $template = get_template_directory() . '/templates/single-badges.php';
                 } else {
-                            $template = $this->plugin_path() . '/templates/single-badges.php';
+                    $template = $this->plugin_path() . '/templates/single-badges.php';
                 }
                 break;
             default:
