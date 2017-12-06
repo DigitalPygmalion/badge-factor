@@ -27,14 +27,16 @@
                     </div>
                     <div class="col-xs-12 col-sm-6 col-md-8 col-lg-8">
                         <h3 class="badge-description-heading">
-                            <?php _e('Description', 'badgefactor'); ?>
                             <?php if (!$member): ?>
-                                <?php if ($GLOBALS['badgefactorwcaddon']): ?>
-                                    <a class="btn btn-success" href="<?php echo get_permalink( woocommerce_get_page_id( 'shop' ) ) ?>?add-to-cart=<?php echo $badgeProductId ?>"><?php _e('Add to cart', 'badgefactor'); ?></a>
-                                <?php else: ?>
-                                    <a class="btn btn-default add-badge" href="<?php echo $GLOBALS['badgefactor']->get_badge_page_url($badge->ID); ?>"><?php _e('Take this course', 'badgefactor'); ?></a>
-                                <?php endif; ?>
-                            <?php endif; ?>
+                                <?php _e('Description', 'badgefactor');
+                                /**
+                                 * BadgeFactore Button
+                                 *
+                                 * @since 1.1.0
+                                 */
+                                do_action( 'bp_add_button_badge' );
+                            endif;
+                            ?>
                         </h3>
                         <?php echo wpautop($badge->post_content); ?>
 

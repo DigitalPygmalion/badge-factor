@@ -101,6 +101,7 @@ class BadgeFactor
         add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ) );
         add_action( 'admin_init',     array($this, 'register_badgefactor_settings' ));
         add_action( 'template_redirect',  array($this, 'parse_member_badge_request' ));
+        add_action( 'bp_add_button_badge',  array($this, 'bp_add_button_badge' ), 10);
         add_filter( 'acf/load_field/key=field_57ab18ef7b1d2', array($this, 'generate_useful_links'), 10, 1);
         add_filter( 'single_template',  array($this, 'locate_single_templates'));
         add_filter( 'archive_template', array($this, 'locate_archive_templates'), 10, 1);
@@ -1660,7 +1661,10 @@ class BadgeFactor
 		exit;
 	}
 
-
+    /**
+     * Add script files for BadgeFactor
+     * @return [type] [description]
+     */
 	public function badgefactor_scripts()
     {
 	    wp_register_script( 'badgefactor-script', plugins_url( '/assets/js/bf.js', __FILE__ ) );
@@ -1671,6 +1675,15 @@ class BadgeFactor
 	    ));
     }
 
+    /**
+     * Change button in badge single-page
+     */
+    public function bp_add_button_badge()
+    {
+        $html = "";
+        $html .= '<a class="btn btn-default add-badge" href="'.$GLOBALS['badgefactor']->get_badge_page_url($badge->ID).'">'.__('Take this course', 'badgefactor').'</a>';
+        echo $html;
+    }
 }
 
 $GLOBALS['badgefactor'] = new BadgeFactor();
