@@ -467,6 +467,7 @@ class BadgeFactor
                 $page_trashed = wp_trash_post((int)$page_id);
                 if (!$page_trashed) return new WP_Error('error', __("Cannot trash page associated to badge!", 'badgefactor'));
             }
+            do_action('badgefactor_woocommerce_trash_badge', $post_id);
         }
         return TRUE;
     }
