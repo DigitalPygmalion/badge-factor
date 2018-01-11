@@ -49,6 +49,14 @@
                         <h3 class="badge-date-heading"><?php _e('Issued on', 'badgefactor'); ?></h3>
                         <span class="badges-unique-granted-date"><?php echo date_i18n('d F Y', strtotime($submission->post_modified)); ?></span>
                         <?php endif; ?>
+                        <?php
+                        /**
+                        * BadgeFactore Button
+                        *
+                        * @since 1.1.0
+                        */
+                        do_action( 'bp_after_badge_content' );
+                        ?>
                     </div>
                 </section>
             </div>
