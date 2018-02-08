@@ -93,6 +93,9 @@ class BadgeFactor
         add_action( 'init', array($this, 'create_cpt_badge'));
         add_action( 'init', array($this, 'update_cpt_submission'));
         add_action( 'init', array($this, 'add_member_badges_page'));
+	    add_action( 'init', array($this, 'register_personal_badge_category'));
+
+
 
         add_action( 'publish_badges', array($this, 'create_badge_chain'), 10, 2);
         add_action( 'wp_trash_post',  array($this, 'trash_badge_chain'), 10, 1);
@@ -104,11 +107,14 @@ class BadgeFactor
         add_action( 'bp_add_button_badge',  array($this, 'bp_add_button_badge' ), 10);
         add_filter( 'acf/load_field/key=field_57ab18ef7b1d2', array($this, 'generate_useful_links'), 10, 1);
         add_filter( 'single_template',  array($this, 'locate_single_templates'));
+        add_filter( 'template_include',  array($this, 'locate_option_templates'));
         add_filter( 'archive_template', array($this, 'locate_archive_templates'), 10, 1);
+	    add_filter( 'display_post_states', array( $this, 'add_display_post_states' ), 15, 2 );
 	    add_filter( 'bp_uri', array($this, 'submission_rewrite_bp_uri'));
 
 
 	    add_action( 'wp_enqueue_scripts', array($this, 'badgefactor_scripts') );
+	    add_action( 'admin_enqueue_scripts', array($this, 'enqueue_select2_jquery') );
 	    add_action( 'wp_ajax_nopriv_toggle-private-status', array($this, 'ajax_toggle_private_status') );
 	    add_action( 'wp_ajax_toggle-private-status', array($this, 'ajax_toggle_private_status') );
 
@@ -145,7 +151,6 @@ class BadgeFactor
 
         flush_rewrite_rules();
     }
-
 
     /**
      * BadgeFactor plugin deactivation hook.
@@ -192,6 +197,15 @@ class BadgeFactor
         include('settings-page.tpl.php');
     }
 
+	/**
+	 * Enqueue the Select 2 for the Options page.
+	 */
+	public function enqueue_select2_jquery() {
+		wp_register_style( 'select2css', '//cdnjs.cloudflare.com/ajax/libs/select2/3.4.8/select2.css', false, '1.0', 'all' );
+		wp_register_script( 'select2', '//cdnjs.cloudflare.com/ajax/libs/select2/3.4.8/select2.js', array( 'jquery' ), '1.0', true );
+		wp_enqueue_style( 'select2css' );
+		wp_enqueue_script( 'select2' );
+	}
 
     /**
      * Check if Gravity Forms version is compatible
@@ -212,7 +226,9 @@ class BadgeFactor
         return true;
     }
 
-
+	/**
+	 *
+	 */
     function display_notices() {
         ?>
         <div class="error">
@@ -227,7 +243,6 @@ class BadgeFactor
         </div>
         <?php
     }
-
 
     /**
      * Check if WordPress version is compatible
@@ -274,14 +289,14 @@ class BadgeFactor
      */
     function register_badgefactor_settings()
     {
-
         //register our settings
         register_setting( 'badgefactor-settings-group', 'badgefactor_form_page_text' );
         register_setting( 'badgefactor-settings-group', 'badgefactor_default_form_button_text' );
         register_setting( 'badgefactor-settings-group', 'badgefactor_default_certificate_name' );
+        register_setting( 'badgefactor-settings-group', 'badgefactor_default_achievement_slug' );
         register_setting( 'badgefactor-settings-group', 'badgefactor_member_page_id' );
+	    register_setting( 'badgefactor-settings-group', 'badgefactor_badges_page' );
     }
-
 
     public function generate_useful_links( $field )
     {
@@ -329,7 +344,6 @@ class BadgeFactor
 
         return $field;
     }
-
 
     /**
      * init hook to update the 'Submission' custom post type.
@@ -633,6 +647,12 @@ class BadgeFactor
                         'return_format' => 'd F Y',
                         'first_day' => 1,
                     ),
+	                array (
+		                'key' => 'bf_hide_badge_page',
+		                'label' => 'Hide from Badge Page',
+		                'name' => 'bf_hide_badge_page',
+		                'type' => 'true_false',
+	                )
                 ),
                 'location' => array (
                     array (
@@ -913,12 +933,17 @@ class BadgeFactor
 
     public function submission_rewrite_bp_uri($path)
     {
+	   global $wp;
+
         $members_page_slug = str_replace(home_url()."/", '', get_permalink(get_option('bp-pages')['members']));
-        $members_badge_slug = "badges";
+	    $members_badge_slug = get_option('badgefactor_default_achievement_slug', 'badges');
+
+        //$members_badge_slug = "badges";
         if( preg_match("#{$members_page_slug}(.*)/{$members_badge_slug}/(.*)#", $path) ) {
-	    global $wp;
-	    $path = $wp->request;
-	    return $path;
+
+	        $path = $wp->request;
+
+	        return $path;
         }
         return $path;
     }
@@ -926,8 +951,13 @@ class BadgeFactor
     public function add_member_badges_page()
     {
         add_rewrite_tag('%member%', '([^&]+)');
-	add_rewrite_tag('%badges%', '([^&]+)');
-        add_rewrite_rule('^members/([^/]+)/badges/([^/]+)/?$','index.php?badges=$matches[2]&member=$matches[1]','top');
+	    add_rewrite_tag('%badges%', '([^&]+)');
+
+	    $members_page_slug = str_replace(home_url()."/", '', get_permalink(get_option('bp-pages')['members']));
+	    $members_badge_slug = get_option('badgefactor_default_achievement_slug', 'badges');
+	    $rewrite_rule = "^" . $members_page_slug . "([^/]+)/" . $members_badge_slug . "/([^/]+)/?$";
+
+	    add_rewrite_rule($rewrite_rule,'index.php?badges=$matches[2]&member=$matches[1]','top');
         flush_rewrite_rules();
     }
 
@@ -938,9 +968,11 @@ class BadgeFactor
 		$url = $_SERVER['REQUEST_URI'];
 		$segments = explode('/', parse_url($url, PHP_URL_PATH));
 		$badge_slug = $segments[4];
+
 		$badge_id = $this->get_badge_id_by_slug($badge_slug);
 		$user = get_user_by('login', $segments[2]);
 		$submission = $this->get_submission($badge_id, $user->ID);
+
 		if (($user->ID != wp_get_current_user()->ID && $GLOBALS['badgefactor']->is_achievement_private($submission->ID) === true)){
 			$user_path = '/' . $segments[1]. '/' . $segments[2];
 			wp_safe_redirect( $user_path );
@@ -1124,6 +1156,43 @@ class BadgeFactor
 
     }
 
+    public function locate_option_templates( $template )
+    {
+	    global $post;
+
+	    if($post->ID == intval(get_option('badgefactor_badges_page'))){
+
+		    if ( file_exists( get_template_directory() . '/templates/archive-badges.php' ) ) {
+			    $template = get_template_directory() . '/templates/archive-badges.php';
+		    } else {
+			    $template = $this->plugin_path() . '/templates/archive-badges.php';
+		    }
+
+		    return $template;
+
+	    }
+	    else{
+		    switch ($post->post_type) {
+			    case 'organisation':
+				    if ( file_exists( get_template_directory() . '/templates/single-organisation.php' ) ) {
+					    $template = get_template_directory() . '/templates/single-organisation.php';
+				    } else {
+					    $template = $this->plugin_path() . '/templates/single-organisation.php';
+				    }
+				    break;
+			    case 'badges':
+				    if ( file_exists( get_template_directory() . '/templates/single-badges.php' ) ) {
+					    $template = get_template_directory() . '/templates/single-badges.php';
+				    } else {
+					    $template = $this->plugin_path() . '/templates/single-badges.php';
+				    }
+				    break;
+		    }
+	    }
+
+	    return $template;
+    }
+
     public function locate_archive_templates( $template )
     {
         global $post;
@@ -1141,33 +1210,41 @@ class BadgeFactor
 
     }
 
-    public function locate_single_templates()
+    public function locate_single_templates( $template )
     {
         global $post;
-        switch ($post->post_type)
-        {
-            case 'organisation':
-                if(file_exists(get_template_directory() . '/templates/single-organisation.php')){
-                    $template = get_template_directory() . '/templates/single-organisation.php';
-                } else {
-                    $template = $this->plugin_path() . '/templates/single-organisation.php';
-                }
-                break;
-            case 'badges':
-                if(file_exists(get_template_directory() . '/templates/single-badges.php')){
-		            $template = get_template_directory() . '/templates/single-badges.php';
-                } else {
-                    $template = $this->plugin_path() . '/templates/single-badges.php';
-                }
-                break;
-            default:
-                $template = null;
+
+	    //Check if this is the badges page
+	    if($post->ID == get_option('badgefactor_badges_page')){
+
+		    if ( file_exists( get_template_directory() . '/templates/archive-badges.php' ) ) {
+			    $template = get_template_directory() . '/templates/archive-badges.php';
+		    } else {
+			    $template = $this->plugin_path() . '/templates/archive-badges.php';
+		    }
+
+	    }
+	    else{
+		    switch ($post->post_type) {
+			    case 'organisation':
+				    if ( file_exists( get_template_directory() . '/templates/single-organisation.php' ) ) {
+					    $template = get_template_directory() . '/templates/single-organisation.php';
+				    } else {
+					    $template = $this->plugin_path() . '/templates/single-organisation.php';
+				    }
+				    break;
+			    case 'badges':
+				    if ( file_exists( get_template_directory() . '/templates/single-badges.php' ) ) {
+					    $template = get_template_directory() . '/templates/single-badges.php';
+				    } else {
+					    $template = $this->plugin_path() . '/templates/single-badges.php';
+				    }
+				    break;
+		    }
         }
 
-        return $template;
-
+	    return $template;
     }
-
 
     public function get_badges()
     {
@@ -1180,6 +1257,29 @@ class BadgeFactor
         return $query->get_posts();
     }
 
+	public function get_badge_page_badges()
+	{
+		$query = new WP_Query([
+			'post_status' => 'publish',
+			'post_type' => 'badges',
+			'posts_per_page' => -1,
+			'meta_query' => array(
+                'relation' => 'or',
+				array(
+					'key'     => 'bf_hide_badge_page',
+					'value'   => '0',
+					'compare' => '=',
+				),
+				array(
+					'key' => 'bf_hide_badge_page',
+					'compare' => 'NOT EXISTS'
+				),
+			),
+		]);
+
+		return $query->get_posts();
+	}
+
     public function get_badge($badge_id)
     {
         return get_post($badge_id);
@@ -1190,9 +1290,12 @@ class BadgeFactor
             'name'        => $badge_slug,
             'post_type'   => 'badges',
             'post_status' => 'publish',
-            'numberposts' => 1
+            'posts_per_page' => 1
         );
         $badge = get_posts($args);
+
+        var_dump($badge);
+
         return $badge ? $badge[0]->ID : false;
     }
 
@@ -1464,6 +1567,9 @@ class BadgeFactor
                          AND pm.post_id = %s", $submission_id
 		        )
 	        );
+
+	        return $submission_id;
+
 	        // FIXME GravityForms will not work if this is not fixed... :(
 	        /*
 			echo "<pre>";
@@ -1483,8 +1589,6 @@ class BadgeFactor
         {
 
         }
-
-
     }
 
     /**
@@ -1494,6 +1598,7 @@ class BadgeFactor
      */
     public function get_attachment_by_submission_id( $submission_id) {
         $attachments = get_attached_media('application/pdf', $submission_id);
+
         if ( is_array($attachments) ) {
             $attachment = array_shift($attachments);
             return wp_get_attachment_url($attachment->ID);
@@ -1501,21 +1606,19 @@ class BadgeFactor
         return null;
     }
 
-
     /**
      * @return int
      */
     public function is_current_page_awarded_achievement()
     {
+	    global $wp;
+
         $members_page_slug = str_replace(home_url()."/", '', get_permalink(get_option('bp-pages')['members']));
-        // FIXME Bring into a WP Admin config variable
-        $members_achievement_slug = "badges";
-        // FIXME Bring into a WP Admin config variable
-        $members_badge_slug = "badges";
-        global $wp;
+        $members_badge_slug = get_option('badgefactor_default_achievement_slug', 'badges');
+        //$members_achievement_slug = "badges";
+        //$members_badge_slug = "badges";
+
         return preg_match("#{$members_page_slug}(.*)/{$members_badge_slug}/(.*)#", $wp->request);
-
-
     }
 
     /**
@@ -1640,7 +1743,6 @@ class BadgeFactor
         return $return;
     }
 
-
 	/**
 	 *
 	 */
@@ -1685,6 +1787,140 @@ class BadgeFactor
         $html .= '<a class="btn btn-default add-badge" href="'.$GLOBALS['badgefactor']->get_badge_page_url($badge->ID).'">'.__('Take this course', 'badgefactor').'</a>';
         echo $html;
     }
+
+	/**
+	 * @param $post_states
+	 * @param $post
+	 *
+	 * @return mixed
+	 */
+	public function add_display_post_states( $post_states, $post ) {
+
+		if ( get_option('badgefactor_badges_page') == $post->ID ) {
+			$post_states['bf_page_for_badges'] = __( 'Badges Page', 'badgefactor' );
+		}
+
+		return $post_states;
+	}
+
+	public function bf_get_badge_post_by_achievement($achievement_id) {
+		$badgeID = get_post_meta($achievement_id, '_badgeos_submission_achievement_id', true);
+
+		if( $badgeID ){
+		    return get_post($badgeID);
+        }
+		return false;
+	}
+
+    public function bf_get_achievement_post_thumbnail($achievement_id, $image_size = 'badgeos-achievement', $class = 'badgeos-item-thumbnail') {
+        $badgeID = get_post_meta($achievement_id, '_badgeos_submission_achievement_id', true);
+
+        return $image = get_the_post_thumbnail( $badgeID, $image_size, array( 'class' => $class ) );
+    }
+
+    /**
+     * The next functions are for adding custom categories to the badges.
+     */
+
+	/**
+     * Register the posttype that holds the personal badge Category
+	 * @return bool
+	 */
+	public function register_personal_badge_category()
+	{
+		// register_post_type
+		$ret = register_post_type('persobadgecat',
+			array(
+				'labels' => array(
+					'name' => 'Personnal badge categories' ,
+					'singular_name' => 'Personal badge category'
+				),
+				'public' => true,
+			)
+		);
+		return false;
+	}
+
+	/**
+	 * @param $personal_category_name
+	 * @param $user_id
+	 *
+	 * @return int|WP_Error
+	 */
+	public function add_personal_category($personal_category_name, $user_id)
+	{
+		$id = wp_insert_post(
+			array(
+				'post_type' => 'persobadgecat',
+				'post_title' => $personal_category_name,
+				'post_author' => $user_id
+			),
+			true
+		);
+		print_r($id);exit;
+		return $id;
+	}
+
+	/**
+	 * @param $postid
+	 * @param $user_id
+	 *
+	 * @return bool
+	 */
+	public function remove_personal_category($postid, $user_id)
+	{
+		$post = get_post ( $postid ); // to validate post type and post author
+
+		if($post->post_author == $user_id && $post->post_type=='persobadgecat'){
+			wp_delete_post($postid);
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * @param $post_id
+	 * @param $badge_id
+	 *
+	 * @return bool|int
+	 */
+	public function join_personal_category($post_id, $badge_id)
+	{
+		$ret = update_post_meta($badge_id,'badge_personal_category',$post_id);
+
+		return $ret;
+	}
+
+	/**
+	 * @param $badge_id
+	 *
+	 * @return mixed
+	 */
+	public function get_badge_personal_category($badge_id)
+	{
+		// get_post_meta
+		$ret = get_post_meta($badge_id, 'badge_personal_category');
+		return $ret;
+	}
+
+	/**
+	 * @param $user_id
+	 *
+	 * @return array
+	 */
+	public function get_personal_categories($user_id)
+	{
+		$query = new WP_Query(array(
+			'author' => $user_id,
+			'post_type' => 'persobadgecat',
+			'post_status' => array('draft','publish'),
+		));
+		return $query->get_posts();
+	}
+
+
+
+
 }
 
 $GLOBALS['badgefactor'] = new BadgeFactor();

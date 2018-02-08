@@ -1,3 +1,14 @@
+<?php
+    $args = array(
+	    'post_type' => 'page',
+	    'post_status' => 'publish'
+    );
+
+    $pages = get_pages($args);
+    $badgePageID = get_option('badgefactor_badges_page');
+
+?>
+
 <div class="wrap">
     <h1><?php _e('Badge Factor Settings', 'badgefactor'); ?></h1>
     <form method="post" action="options.php">
@@ -16,9 +27,35 @@
                 <th scope="row"><?php _e('Default Certificate Name', 'badgefactor'); ?></th>
                 <td><input type="text" name="badgefactor_default_certificate_name" value="<?php echo esc_attr( get_option('badgefactor_default_certificate_name', __('Badge', 'badgefactor')) ); ?>" /></td>
             </tr>
+            <tr valign="top">
+                <th scope="row"><?php _e('Member Achievement Slug', 'badgefactor'); ?></th>
+                <td><input type="text" name="badgefactor_default_achievement_slug" value="<?php echo esc_attr( get_option('badgefactor_default_achievement_slug', __('badges', 'badgefactor')) ); ?>" /></td>
+            </tr>
+            <tr valign="top">
+                <th scope="row"><?php _e('Badgefactor Badges page', 'badgefactor'); ?></th>
+                <td>
+                    <select name="badgefactor_badges_page">
+                        <?php foreach ( $pages as $page ){ ?>
+                            <?php  $selected = ($badgePageID == $page->ID)? ' selected="selected"': false; ?>
+                            <option value="<?php echo $page->ID; ?>" <?php echo $selected; ?>><?php echo $page->post_title?></option>
+                        <?php }?>
+                    </select>
+                </td>
+            </tr>
         </table>
 
         <?php submit_button(); ?>
 
     </form>
 </div>
+
+<script type='text/javascript'>
+    jQuery(document).ready(function ($) {
+        if( $( 'select' ).length > 0 ) {
+            $( 'select' ).select2();
+            $( document.body ).on( "click", function() {
+                $( 'select' ).select2();
+            });
+        }
+    });
+</script>
