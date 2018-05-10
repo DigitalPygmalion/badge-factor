@@ -1455,7 +1455,7 @@ class BadgeFactor
 			        "SELECT pdf.form_id AS form_id,
                          pdfm.display_meta AS form_meta,
                          pdf.lead_id AS lead_id
-                         FROM {$wpdb->prefix}rg_lead_detail AS pdf
+                         FROM {$wpdb->prefix}gf_entry_meta AS pdf
                          INNER JOIN {$wpdb->prefix}postmeta AS pm
                          ON pdf.value = pm.meta_value
                          INNER JOIN {$wpdb->prefix}posts AS p
