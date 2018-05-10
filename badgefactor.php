@@ -1457,7 +1457,7 @@ class BadgeFactor
                          pdf.entry_id AS lead_id
                          FROM {$wpdb->prefix}gf_entry_meta AS pdf
                          INNER JOIN {$wpdb->prefix}postmeta AS pm
-                         ON pdf.value = pm.meta_value
+                         ON pdf.meta_value = pm.meta_value
                          INNER JOIN {$wpdb->prefix}posts AS p
                          ON p.ID = pm.post_id
                          INNER JOIN {$wpdb->prefix}gf_form_meta AS pdfm
