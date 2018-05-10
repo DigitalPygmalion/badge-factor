@@ -1460,7 +1460,7 @@ class BadgeFactor
                          ON pdf.value = pm.meta_value
                          INNER JOIN {$wpdb->prefix}posts AS p
                          ON p.ID = pm.post_id
-                         INNER JOIN {$wpdb->prefix}rg_form_meta AS pdfm
+                         INNER JOIN {$wpdb->prefix}gf_form_meta AS pdfm
                          ON pdf.form_id = pdfm.form_id
                          WHERE p.post_status = 'publish'
                          AND pm.meta_key = '_badgeos_submission_achievement_id'
