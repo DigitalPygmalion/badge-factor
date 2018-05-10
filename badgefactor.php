@@ -1408,6 +1408,10 @@ class BadgeFactor
      */
 	public function get_submission($badge_id, $wp_user)
     {
+        if (is_int($wp_user) && $wp_user > 0)
+        {
+            $wp_user = get_user_by('ID', $wp_user);
+        }
         $query = new WP_Query([
             'post_status' => 'publish',
             'post_type' => 'submission',
