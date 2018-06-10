@@ -673,13 +673,15 @@ class BadgeFactor
                         'type' => 'date_picker',
                         'instructions' => '',
                         'required' => 0,
-                        'conditional_logic' => array(array(
+                        'conditional_logic' => array(
                             'status' => 1,
-                            array(
-                                "field" => "field_584acbfa454f8",
-                                "operator" => "==",
-                                "value" => "end_date"
-                            )),
+                            'rules' => array(
+                                array(
+                                    "field" => "field_584acbfa454f8",
+                                    "operator" => "==",
+                                    "value" => "end_date"
+                                )
+                            ),
                             'allorany' => 'all',
                         ),
                         'wrapper' => array(
@@ -699,13 +701,15 @@ class BadgeFactor
                         'instructions' => '',
                         'required' => 0,
                         'append' => 'an(s)',
-                        'conditional_logic' => array(array(
+                        'conditional_logic' => array(
                             'status' => 1,
-                            array(
-                                "field" => "field_584acbfa454f8",
-                                "operator" => "==",
-                                "value" => "duree_fin"
-                            )),
+                            'rules' => array(
+                                array(
+                                    "field" => "field_584acbfa454f8",
+                                    "operator" => "==",
+                                    "value" => "duree_fin"
+                                )
+                            ),
                             'allorany' => 'all',
                         ),
                         'wrapper' => array(
