@@ -83,39 +83,41 @@ class BadgeFactor
         $this->directory_url = plugin_dir_url(__FILE__);
 
         // Load translations
-        load_plugin_textdomain('badgefactor', false, basename( dirname( __FILE__ ) ).'/languages');
+        load_plugin_textdomain('badgefactor', false, basename(dirname(__FILE__)) . '/languages');
 
         // Activation / deactivation hooks
         register_activation_hook(__FILE__, array($this, 'activate'));
         register_deactivation_hook(__FILE__, array($this, 'deactivate'));
 
         // Hook declaration
-        add_action( 'init', array($this, 'create_cpt_organisation'));
-        add_action( 'init', array($this, 'create_cpt_badge'));
-        add_action( 'init', array($this, 'update_cpt_submission'));
-        add_action( 'init', array($this, 'add_member_badges_page'));
+        add_action('init', array($this, 'create_cpt_organisation'));
+        add_action('init', array($this, 'create_cpt_badge'));
+        add_action('init', array($this, 'update_cpt_submission'));
+        add_action('init', array($this, 'add_member_badges_page'));
 
-        add_action( 'publish_badges', array($this, 'create_badge_chain'), 10, 2);
-        add_action( 'wp_trash_post',  array($this, 'trash_badge_chain'), 10, 1);
-        add_action( 'admin_menu',     array($this, 'badgefactor_menu'), 99);
-        add_action( 'add_meta_boxes', array($this, 'add_metabox'), 99);
-        add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ) );
-        add_action( 'admin_init',     array($this, 'register_badgefactor_settings' ));
-        add_action( 'template_redirect',  array($this, 'parse_member_badge_request' ));
-        add_filter( 'acf/load_field/key=field_57ab18ef7b1d2', array($this, 'generate_useful_links'), 10, 1);
-        add_filter( 'single_template',  array($this, 'locate_single_templates'));
-        add_filter( 'archive_template', array($this, 'locate_archive_templates'), 10, 1);
-	add_filter( 'bp_uri', array($this, 'submission_rewrite_bp_uri'));
+        add_action('publish_badges', array($this, 'create_badge_chain'), 10, 2);
+        add_action('wp_trash_post', array($this, 'trash_badge_chain'), 10, 1);
+        add_action('admin_menu', array($this, 'badgefactor_menu'), 99);
+        add_action('add_meta_boxes', array($this, 'add_metabox'), 99);
+        add_action('plugins_loaded', array($this, 'plugins_loaded'));
+        add_action('admin_init', array($this, 'register_badgefactor_settings'));
+        add_action('template_redirect', array($this, 'parse_member_badge_request'));
+        add_filter('acf/load_field/key=field_57ab18ef7b1d2', array($this, 'generate_useful_links'), 10, 1);
+        add_filter('single_template', array($this, 'locate_single_templates'));
+        add_filter('archive_template', array($this, 'locate_archive_templates'), 10, 1);
+        add_filter('bp_uri', array($this, 'submission_rewrite_bp_uri'));
 
 
-	    add_action( 'wp_enqueue_scripts', array($this, 'badgefactor_scripts') );
-	    add_action( 'wp_ajax_nopriv_toggle-private-status', array($this, 'ajax_toggle_private_status') );
-	    add_action( 'wp_ajax_toggle-private-status', array($this, 'ajax_toggle_private_status') );
+        add_action('wp_enqueue_scripts', array($this, 'badgefactor_scripts'));
+        add_action('wp_ajax_nopriv_toggle-private-status', array($this, 'ajax_toggle_private_status'));
+        add_action('wp_ajax_toggle-private-status', array($this, 'ajax_toggle_private_status'));
 
         add_theme_support('post-thumbnails');
         add_image_size('square-140', 140, 140, false);
         add_image_size('square-225', 225, 225, false);
         add_image_size('square-450', 450, 450, false);
+
+        
 
     }
 
@@ -129,19 +131,19 @@ class BadgeFactor
     public function activate()
     {
         // Setup default Credly options
-        $credly_settings = (array) get_option( 'credly_settings', array() );
+        $credly_settings = (array)get_option('credly_settings', array());
 
 
-        $credly_settings['credly_enable']                      = 'false';
-        $credly_settings['credly_badge_title']                 = 'post_title';
-        $credly_settings['credly_badge_description']           = 'post_body';
-        $credly_settings['credly_badge_short_description']     = 'post_excerpt';
-        $credly_settings['credly_badge_criteria']              = '';
-        $credly_settings['credly_badge_image']                 = 'featured_image';
-        $credly_settings['credly_badge_testimonial']           = 'congratulations_text';
-        $credly_settings['credly_badge_evidence']              = 'permalink';
+        $credly_settings['credly_enable'] = 'false';
+        $credly_settings['credly_badge_title'] = 'post_title';
+        $credly_settings['credly_badge_description'] = 'post_body';
+        $credly_settings['credly_badge_short_description'] = 'post_excerpt';
+        $credly_settings['credly_badge_criteria'] = '';
+        $credly_settings['credly_badge_image'] = 'featured_image';
+        $credly_settings['credly_badge_testimonial'] = 'congratulations_text';
+        $credly_settings['credly_badge_evidence'] = 'permalink';
         $credly_settings['credly_badge_sendemail_add_message'] = 'false';
-        update_option( 'credly_settings', $credly_settings );
+        update_option('credly_settings', $credly_settings);
 
         flush_rewrite_rules();
     }
@@ -157,7 +159,7 @@ class BadgeFactor
 
     function add_metabox()
     {
-        foreach ( badgeos_get_achievement_types_slugs() as $achievement_type ) {
+        foreach (badgeos_get_achievement_types_slugs() as $achievement_type) {
             remove_meta_box('badgeos_credly_details_meta_box', $achievement_type, 'advanced');
         }
 
@@ -177,8 +179,10 @@ class BadgeFactor
         remove_submenu_page('badgeos_badgeos', 'badgeos_sub_help_support');
         remove_submenu_page('badgeos_badgeos', 'open-badges-issuer');
         remove_menu_page('badgeos_badgeos');
-        add_menu_page( 'Badge Factor', 'Badge Factor', $minimum_role, 'badgeos_badgeos', 'badgeos_settings', $this->directory_url . 'images/badgefactor_icon.png', 110 );
+        add_menu_page('Badge Factor', 'Badge Factor', $minimum_role, 'badgeos_badgeos', 'badgeos_settings', $this->directory_url . 'images/badgefactor_icon.png', 110);
         add_submenu_page('badgeos_badgeos', __('Badge Factor Options', 'badgefactor'), __('Options', 'badgefactor'), 'manage_options', 'badgefactor', array($this, 'badgefactor_options'));
+        add_submenu_page('badgeos_badgeos', __('Category', 'badgefactor'), __('Category', 'badgefactor'), current_user_can(badgeos_get_manager_capability()), 'edit-tags.php?taxonomy=badge_category&post_type=badges', false);
+
     }
 
     /**
@@ -200,11 +204,12 @@ class BadgeFactor
      *
      * @since 1.0.0
      */
-    public function check_gravity_forms() {
+    public function check_gravity_forms()
+    {
 
         /* Gravity Forms version not compatible */
-        if ( ! class_exists( 'GFCommon' ) || ! version_compare( GFCommon::$version, $this->required_gf_version, '>=' ) ) {
-            $this->notices[] = sprintf( esc_html__( '%sGravity Forms%s Version %s is required. %sGet more info%s.', 'gravity-forms-pdf-extended' ), '<a href="https://www.e-junkie.com/ecom/gb.php?cl=54585&c=ib&aff=235154">', '</a>', $this->required_gf_version, '<a href="https://gravitypdf.com/documentation/v4/user-activation-errors/#gravityforms-version">', '</a>' );
+        if (!class_exists('GFCommon') || !version_compare(GFCommon::$version, $this->required_gf_version, '>=')) {
+            $this->notices[] = sprintf(esc_html__('%sGravity Forms%s Version %s is required. %sGet more info%s.', 'gravity-forms-pdf-extended'), '<a href="https://www.e-junkie.com/ecom/gb.php?cl=54585&c=ib&aff=235154">', '</a>', $this->required_gf_version, '<a href="https://gravitypdf.com/documentation/v4/user-activation-errors/#gravityforms-version">', '</a>');
 
             return false;
         }
@@ -213,14 +218,15 @@ class BadgeFactor
     }
 
 
-    function display_notices() {
+    function display_notices()
+    {
         ?>
         <div class="error">
-            <p><strong><?php esc_html_e( 'Badge Factor Installation Problem', 'badgefactor' ); ?></strong></p>
+            <p><strong><?php esc_html_e('Badge Factor Installation Problem', 'badgefactor'); ?></strong></p>
 
-            <p><?php esc_html_e( 'The minimum requirements for Badge Factor have not been met. Please fix the issue(s) below to continue:', 'badgefactor' ); ?></p>
+            <p><?php esc_html_e('The minimum requirements for Badge Factor have not been met. Please fix the issue(s) below to continue:', 'badgefactor'); ?></p>
             <ul style="padding-bottom: 0.5em">
-                <?php foreach ( $this->notices as $notice ) : ?>
+                <?php foreach ($this->notices as $notice) : ?>
                     <li style="padding-left: 20px;list-style: inside"><?php echo $notice; ?></li>
                 <?php endforeach; ?>
             </ul>
@@ -236,12 +242,13 @@ class BadgeFactor
      *
      * @since 1.0.0
      */
-    public function is_compatible_wordpress_version() {
+    public function is_compatible_wordpress_version()
+    {
         global $wp_version;
 
         /* WordPress version not compatible */
-        if ( ! version_compare( $wp_version, $this->required_wp_version, '>=' ) ) {
-            $this->notices[] = sprintf( esc_html__( 'WordPress Version %s is required. %sGet more info%s.', 'gravity-forms-pdf-extended' ), $this->required_wp_version, '<a href="https://gravitypdf.com/documentation/v4/user-activation-errors/#wordpress-version">', '</a>' );
+        if (!version_compare($wp_version, $this->required_wp_version, '>=')) {
+            $this->notices[] = sprintf(esc_html__('WordPress Version %s is required. %sGet more info%s.', 'gravity-forms-pdf-extended'), $this->required_wp_version, '<a href="https://gravitypdf.com/documentation/v4/user-activation-errors/#wordpress-version">', '</a>');
 
             return false;
         }
@@ -256,13 +263,12 @@ class BadgeFactor
         $this->is_compatible_wordpress_version();
 
         /* Check if any errors were thrown, enqueue them and exit early */
-        if ( sizeof( $this->notices ) > 0 ) {
-            add_action( 'admin_notices', array( $this, 'display_notices' ) );
+        if (sizeof($this->notices) > 0) {
+            add_action('admin_notices', array($this, 'display_notices'));
             // FIXME deactivate_plugins( plugin_basename( __FILE__ ) );
 
-            if ( isset( $_GET['activate'] ) )
-            {
-                unset( $_GET['activate'] );
+            if (isset($_GET['activate'])) {
+                unset($_GET['activate']);
             }
 
             return null;
@@ -276,57 +282,48 @@ class BadgeFactor
     {
 
         //register our settings
-        register_setting( 'badgefactor-settings-group', 'badgefactor_form_page_text' );
-        register_setting( 'badgefactor-settings-group', 'badgefactor_default_form_button_text' );
-        register_setting( 'badgefactor-settings-group', 'badgefactor_default_certificate_name' );
-        register_setting( 'badgefactor-settings-group', 'badgefactor_member_page_id' );
+        register_setting('badgefactor-settings-group', 'badgefactor_form_page_text');
+        register_setting('badgefactor-settings-group', 'badgefactor_default_form_button_text');
+        register_setting('badgefactor-settings-group', 'badgefactor_default_certificate_name');
+        register_setting('badgefactor-settings-group', 'badgefactor_member_page_id');
+        register_setting('badgefactor-settings-group', 'badge_partage_public');
     }
 
 
-    public function generate_useful_links( $field )
+    public function generate_useful_links($field)
     {
         global $post;
         $post_id = $post->ID;
         $message = "";
 
-        if ($this->check_gravity_forms())
-        {
+        if ($this->check_gravity_forms()) {
             $form_page_id = get_post_meta($post_id, 'badgefactor_form_page_id', true);
-            if ($form_page_id !== '' && is_numeric($form_page_id) )
-            {
-                $message .= "<a target='_blank' href='".get_admin_url()."post.php?post={$form_page_id}&action=edit'>".__('Form Page', 'badgefactor')."</a><br/>";
-            }
-            else
-            {
-                $message .= __("Form Page not linked!", 'badgefactor')."<br/>";
+            if ($form_page_id !== '' && is_numeric($form_page_id)) {
+                $message .= "<a target='_blank' href='" . get_admin_url() . "post.php?post={$form_page_id}&action=edit'>" . __('Form Page', 'badgefactor') . "</a><br/>";
+            } else {
+                $message .= __("Form Page not linked!", 'badgefactor') . "<br/>";
             }
 
             $form_id = get_post_meta($post_id, 'badgefactor_form_id', true);
-            if ($form_id !== '' && is_numeric($form_id) )
-            {
-                $message .= "<a target='_blank' href='".get_admin_url()."admin.php?page=gf_edit_forms&id={$form_id}'>".__('Form', 'badgefactor')."</a><br/>";
-            }
-            else
-            {
-                $message .= __("Form not linked!", 'badgefactor')."<br/>";
+            if ($form_id !== '' && is_numeric($form_id)) {
+                $message .= "<a target='_blank' href='" . get_admin_url() . "admin.php?page=gf_edit_forms&id={$form_id}'>" . __('Form', 'badgefactor') . "</a><br/>";
+            } else {
+                $message .= __("Form not linked!", 'badgefactor') . "<br/>";
             }
 
         } else {
-            $message .= __("GravityForms not used.", 'badgefactor')."<br/>";
+            $message .= __("GravityForms not used.", 'badgefactor') . "<br/>";
         }
 
         $page_id = get_post_meta($post_id, 'badgefactor_page_id', true);
-        if ($page_id !== '' && is_numeric($page_id) )
-        {
-            $message .= "<a target='_blank' href='".get_admin_url()."post.php?post={$page_id}&action=edit'>".__('Description Page', 'badgefactor')."</a>";
-        }
-        else
-        {
-            $message .= __("Description Page not linked!", 'badgefactor')."<br/>";
+        if ($page_id !== '' && is_numeric($page_id)) {
+            $message .= "<a target='_blank' href='" . get_admin_url() . "post.php?post={$page_id}&action=edit'>" . __('Description Page', 'badgefactor') . "</a>";
+        } else {
+            $message .= __("Description Page not linked!", 'badgefactor') . "<br/>";
         }
 
         $field['message'] = $message;
-        
+
         return $field;
     }
 
@@ -336,13 +333,13 @@ class BadgeFactor
      */
     public function update_cpt_submission()
     {
-        if( function_exists('register_field_group') ):
+        if (function_exists('register_field_group')):
 
-            register_field_group(array (
+            register_field_group(array(
                 'id' => 'badge_factor_submission_settings',
                 'title' => __('Submission Settings', 'badgefactor'),
-                'fields' => array (
-                    array (
+                'fields' => array(
+                    array(
                         'key' => 'field_57a0a3587cee0',
                         'label' => __('Public', 'badgefactor'),
                         'name' => 'public',
@@ -350,26 +347,33 @@ class BadgeFactor
                         'instructions' => '',
                         'required' => 0,
                         'conditional_logic' => 0,
-                        'wrapper' => array (
+                        'wrapper' => array(
                             'width' => '',
                             'class' => '',
                             'id' => '',
                         ),
                         'message' => '',
-                        'default_value' => 0,
+                        'default_value' => 1,
                     ),
                 ),
-                'location' => array (
-                    array (
-                        array (
+                'location' => array(
+                    array(
+                        array(
                             'param' => 'post_type',
                             'operator' => '==',
                             'value' => 'submission',
                         ),
                     ),
+                    array(
+                        array(
+                            'param' => 'post_type',
+                            'operator' => '==',
+                            'value' => 'nomination',
+                        ),
+                    ),
                 ),
                 'menu_order' => 0,
-                'options' => array (
+                'options' => array(
                     'position' => 'side',
                     'layout' => 'default',
                     'label_placement' => 'top',
@@ -392,23 +396,18 @@ class BadgeFactor
      */
     public function create_badge_chain($ID, $post)
     {
+        remove_action("publish_badges", array($this, 'create_badge_chain'), 10);
         $form_page_id = 0;
-        if ($post->post_type == 'badges')
-        {
-            if (get_post_meta( $ID, 'badgefactor_form_id', true) == '')
-            {
-                if ($this->check_gravity_forms())
-                {
+        if ($post->post_type == 'badges') {
+            if (get_post_meta($ID, 'badgefactor_form_id', true) == '') {
+                if ($this->check_gravity_forms()) {
                     $form_id = $this->create_badge_submission_form($post);
-                    if (!is_wp_error($form_id))
-                    {
-                        update_post_meta( $ID, 'badgefactor_form_id', $form_id );
+                    if (!is_wp_error($form_id)) {
+                        update_post_meta($ID, 'badgefactor_form_id', $form_id);
 
-                        if (get_post_meta( $ID, 'badgefactor_form_page_id', true) == '')
-                        {
+                        if (get_post_meta($ID, 'badgefactor_form_page_id', true) == '') {
                             $form_page_id = $this->create_badge_form_page($post->post_title, $form_id);
-                            if (!is_wp_error($form_page_id))
-                            {
+                            if (!is_wp_error($form_page_id)) {
                                 update_post_meta($ID, 'badgefactor_form_page_id', $form_page_id);
                             }
                         }
@@ -416,11 +415,9 @@ class BadgeFactor
                 }
             }
 
-            if (get_post_meta( $ID, 'badgefactor_page_id', true) == '')
-            {
-                $page_id = $this->create_course_page($post, '<a href="'.get_permalink($form_page_id).'">'.__('Get this badge', 'badgefactor').'</a>');
-                if (!is_wp_error($page_id))
-                {
+            if (get_post_meta($ID, 'badgefactor_page_id', true) == '') {
+                $page_id = $this->create_course_page($post, '<a href="' . get_permalink($form_page_id) . '">' . __('Get this badge', 'badgefactor') . '</a>');
+                if (!is_wp_error($page_id)) {
                     update_post_meta($ID, 'badgefactor_page_id', $page_id);
                 }
                 wp_update_post(array('ID' => $form_page_id, 'post_parent' => $page_id));
@@ -439,20 +436,16 @@ class BadgeFactor
     public function trash_badge_chain($post_id)
     {
         $post = get_post($post_id);
-        if ($post !== NULL && $post->post_type == 'badges')
-        {
-            if ($this->check_gravity_forms())
-            {
+        if ($post !== NULL && $post->post_type == 'badges') {
+            if ($this->check_gravity_forms()) {
                 $form_page_id = get_post_meta($post_id, 'badgefactor_form_page_id', true);
-                if ($form_page_id !== '' && is_numeric($form_page_id) )
-                {
+                if ($form_page_id !== '' && is_numeric($form_page_id)) {
                     $form_page_trashed = wp_trash_post((int)$form_page_id);
                     if (!$form_page_trashed) return new WP_Error('error', __("Cannot trash form page associated to badge!", 'badgefactor'));
                 }
 
                 $form_id = get_post_meta($post_id, 'badgefactor_form_id', true);
-                if ($form_id !== '' && is_numeric($form_id) )
-                {
+                if ($form_id !== '' && is_numeric($form_id)) {
 
                     $form_trashed = GFAPI::delete_form((int)$form_id);
                     if (!$form_trashed) return new WP_Error('error', __("Cannot trash form associated to badge!", 'badgefactor'));
@@ -460,8 +453,7 @@ class BadgeFactor
             }
 
             $page_id = get_post_meta($post_id, 'badgefactor_page_id', true);
-            if ($page_id !== '' && is_numeric($page_id) )
-            {
+            if ($page_id !== '' && is_numeric($page_id)) {
                 $page_trashed = wp_trash_post((int)$page_id);
                 if (!$page_trashed) return new WP_Error('error', __("Cannot trash page associated to badge!", 'badgefactor'));
             }
@@ -476,59 +468,70 @@ class BadgeFactor
     public function create_cpt_badge()
     {
         // Register the post type
-        register_post_type( 'badges', array(
-            'labels'             => array(
-                'name'               => __( 'Badges', 'badgefactor'),
-                'singular_name'      => __( 'Badge', 'badgefactor'),
-                'add_new'            => __( 'Add New', 'badgefactor' ),
-                'add_new_item'       => __( 'Add New Badge', 'badgefactor' ),
-                'edit_item'          => __( 'Edit Badge', 'badgefactor' ),
-                'new_item'           => __( 'New Badge', 'badgefactor' ),
-                'all_items'          => __( 'Badges', 'badgefactor'),
-                'view_item'          => __( 'View Badges', 'badgefactor' ),
-                'search_items'       => __( 'Search Badges', 'badgefactor' ),
-                'not_found'          => __( 'No Badge found', 'badgefactor' ),
-                'not_found_in_trash' => __( 'No Badge found in Trash', 'badgefactor' ),
-                'parent_item_colon'  => '',
-                'menu_name'          => 'Badges',
+        register_post_type('badges', array(
+            'labels' => array(
+                'name' => __('Badges', 'badgefactor'),
+                'singular_name' => __('Badge', 'badgefactor'),
+                'add_new' => __('Add New', 'badgefactor'),
+                'add_new_item' => __('Add New Badge', 'badgefactor'),
+                'edit_item' => __('Edit Badge', 'badgefactor'),
+                'new_item' => __('New Badge', 'badgefactor'),
+                'all_items' => __('Badges', 'badgefactor'),
+                'view_item' => __('View Badges', 'badgefactor'),
+                'search_items' => __('Search Badges', 'badgefactor'),
+                'not_found' => __('No Badge found', 'badgefactor'),
+                'not_found_in_trash' => __('No Badge found in Trash', 'badgefactor'),
+                'parent_item_colon' => '',
+                'menu_name' => 'Badges',
             ),
             'rewrite' => array(
                 'slug' => 'badges',
             ),
-            'public'             => true,
+            'public' => true,
             'publicly_queryable' => true,
-            'show_ui'            => current_user_can( badgeos_get_manager_capability() ),
-            'show_in_menu'       => 'badgeos_badgeos',
-            'query_var'          => true,
-            'capability_type'    => 'post',
-            'has_archive'        => 'badges',
-            'hierarchical'       => true,
-            'menu_position'      => null,
-            'supports'           => array( 'title', 'editor', 'excerpt', 'author', 'thumbnail', 'page-attributes' )
-        ) );
+            'show_ui' => current_user_can(badgeos_get_manager_capability()),
+            'show_in_menu' => 'badgeos_badgeos',
+            'query_var' => true,
+            'capability_type' => 'post',
+            'has_archive' => 'badges',
+            'hierarchical' => true,
+            'menu_position' => null,
+            'supports' => array('title', 'editor', 'excerpt', 'author', 'thumbnail', 'page-attributes')
+        ));
 
         // Register the Achievement type
-        badgeos_register_achievement_type( strtolower( 'Badge' ), strtolower( 'Badges' ) );
+        badgeos_register_achievement_type(strtolower('Badge'), strtolower('Badges'));
+
 
         register_taxonomy(
             'badge_category',
-            'badge',
+            'badges',
             array(
-                'label' => __( 'Category', 'badgefactor'),
-                'capabilities' => array(
-                    'assign_terms' => 'edit_guides',
-                    'edit_terms' => 'publish_guides',
-                )
+                'hierarchical' => true,
+                'query_var' => true,
+                'rewrite' => true,
+                'has_archive' => true,
+                'show_ui' => true,
+                'show_in_menu' => 'badgeos_badgeos',
+                'show_admin_column' => true,
+                'menu_position' => 25,
+
+                'label' => __('Category', 'badgefactor'),
+                /*        'capabilities' => array(
+                            'assign_terms' => 'edit_guides',
+                            'edit_terms' => 'publish_guides',
+                        ) */
             )
         );
 
-        if( function_exists('register_field_group') ):
 
-            register_field_group(array (
+        if (function_exists('register_field_group')):
+
+            register_field_group(array(
                 'id' => 'badge_factor_settings',
                 'title' => 'Badge Factor',
-                'fields' => array (
-                    array (
+                'fields' => array(
+                    array(
                         'key' => 'field_579f78d2049',
                         'label' => __('Organisation', 'badgefactor'),
                         'name' => 'organisation',
@@ -536,44 +539,21 @@ class BadgeFactor
                         'instructions' => '',
                         'required' => 1,
                         'conditional_logic' => 0,
-                        'wrapper' => array (
+                        'wrapper' => array(
                             'width' => '',
                             'class' => '',
                             'id' => '',
                         ),
-                        'post_type' => array (
+                        'post_type' => array(
                             0 => 'organisation',
                         ),
-                        'taxonomy' => array (
-                        ),
+                        'taxonomy' => array(),
                         'allow_null' => 0,
                         'multiple' => 0,
                         'return_format' => 'object',
                         'ui' => 1,
                     ),
-                    array (
-                        'key' => 'field_579f81358c890',
-                        'label' => __('Category', 'badgefactor'),
-                        'name' => 'category',
-                        'type' => 'taxonomy',
-                        'instructions' => '',
-                        'required' => 0,
-                        'conditional_logic' => 0,
-                        'wrapper' => array (
-                            'width' => '',
-                            'class' => '',
-                            'id' => '',
-                        ),
-                        'taxonomy' => 'badge_category',
-                        'field_type' => 'checkbox',
-                        'allow_null' => 0,
-                        'add_term' => 1,
-                        'save_terms' => 0,
-                        'load_terms' => 0,
-                        'return_format' => 'id',
-                        'multiple' => 0,
-                    ),
-                    array (
+                    array(
                         'key' => 'field_579f856ba98ce',
                         'label' => __('Endorsed by', 'badgefactor'),
                         'name' => 'endorsed_by',
@@ -581,22 +561,21 @@ class BadgeFactor
                         'instructions' => '',
                         'required' => 0,
                         'conditional_logic' => 0,
-                        'wrapper' => array (
+                        'wrapper' => array(
                             'width' => '',
                             'class' => '',
                             'id' => '',
                         ),
-                        'post_type' => array (
+                        'post_type' => array(
                             0 => 'organisation',
                         ),
-                        'taxonomy' => array (
-                        ),
+                        'taxonomy' => array(),
                         'allow_null' => 1,
                         'multiple' => 1,
                         'return_format' => 'object',
                         'ui' => 1,
                     ),
-                    array (
+                    array(
                         'key' => 'field_57ab18ef7b1d2',
                         'label' => __('Useful links', 'badgefactor'),
                         'name' => 'useful_links',
@@ -604,7 +583,7 @@ class BadgeFactor
                         'instructions' => '',
                         'required' => 0,
                         'conditional_logic' => 0,
-                        'wrapper' => array (
+                        'wrapper' => array(
                             'width' => '',
                             'class' => '',
                             'id' => '',
@@ -613,15 +592,95 @@ class BadgeFactor
                         'new_lines' => '',
                         'esc_html' => 0,
                     ),
-                    array (
+                    array(
+                        'key' => 'field_579f78d2042',
+                        'label' => __('More information title', 'badgefactor'),
+                        'name' => 'badgefactor_page_title',
+                        'type' => 'text',
+                        'instructions' => '',
+                        'default_value'=> __('More information<br>and register', 'badgefactor'),
+                        'required' => 0,
+                        'conditional_logic' => 0,
+                        'wrapper' => array(
+                            'width' => '',
+                            'class' => '',
+                            'id' => '',
+                        ),
+                    ),
+                    array(
+                        'key' => 'field_579f78d2041',
+                        'label' => __('More information page', 'badgefactor'),
+                        'name' => 'badgefactor_page_id',
+                        'type' => 'post_object',
+                        'instructions' => '',
+                        'required' => 0,
+                        'conditional_logic' => 0,
+                        'wrapper' => array(
+                            'width' => '',
+                            'class' => '',
+                            'id' => '',
+                        ),
+                        'post_type' => array(
+                            0 => 'page',
+                        ),
+                        'taxonomy' => array(),
+                        'allow_null' => 0,
+                        'multiple' => 0,
+                        'return_format' => 'object',
+                        'ui' => 1,
+                    ),
+                    array(
+                        'key' => 'field_579f78d2035',
+                        'label' => __('External URL', 'badgefactor'),
+                        'name' => 'badgefactor_page_url',
+                        'type' => 'text',
+                        'instructions' => __('More information page', 'badgefactor'),
+                        'required' => 0,
+                        'default_value' => '',
+                        'placeholder' => '',
+                        'prepend' => '',
+                        'append' => '',
+                        'min' => '',
+                        'max' => '',
+                        'step' => '',
+                    ),
+
+                    array(
+                        'key' => 'field_584acbfa454f8',
+                        'label' => 'Type de durée de validité',
+                        'name' => 'type_fin',
+                        'type' => 'select',
+                        'choices' => array(
+                            'n/a' => 'N/A',
+                            'end_date' => 'Date de fin',
+                            'duree_fin' => 'Durée de validité',
+                        ),
+                        'instructions' => '',
+                        'required' => 0,
+                        'append' => '',
+                        'conditional_logic' => 0,
+                        'wrapper' => array(
+                            'width' => '',
+                            'class' => '',
+                            'id' => '',
+                        ),
+                        'first_day' => 1,
+                    ),
+                    array(
                         'key' => 'field_584acafa654f8',
                         'label' => 'Date de fin',
                         'name' => 'end_date',
                         'type' => 'date_picker',
                         'instructions' => '',
                         'required' => 0,
-                        'conditional_logic' => 0,
-                        'wrapper' => array (
+                        'conditional_logic' => array(array(
+                            array(
+                                "field" => "field_584acbfa454f8",
+                                "operator" => "==",
+                                "value" => "end_date"
+                            ))
+                        ),
+                        'wrapper' => array(
                             'width' => '',
                             'class' => '',
                             'id' => '',
@@ -630,10 +689,45 @@ class BadgeFactor
                         'return_format' => 'd F Y',
                         'first_day' => 1,
                     ),
+                    array(
+                        'key' => 'field_584acbfa654f8',
+                        'label' => 'Durée de validité',
+                        'name' => 'duree_fin',
+                        'type' => 'number',
+                        'instructions' => '',
+                        'required' => 0,
+                        'append' => 'an(s)',
+                        'conditional_logic' => array(array(
+                            array(
+                                "field" => "field_584acbfa454f8",
+                                "operator" => "==",
+                                "value" => "duree_fin"
+                            ))
+                        ),
+                        'wrapper' => array(
+                            'width' => '',
+                            'class' => '',
+                            'id' => '',
+                        ),
+                        'first_day' => 1,
+                    ),
+                    array(
+                        'key' => 'field_59159159271cc',
+                        'label' => 'ID Cours Moodle',
+                        'name' => 'id_cours_moodle',
+                        'type' => 'text',
+                    ),
+                    /*
+                    array(
+                        'key' => 'field_59159159271cb',
+                        'label' => 'ID Achievement',
+                        'name' => 'id_achievement',
+                        'type' => 'text',
+                    ),*/
                 ),
-                'location' => array (
-                    array (
-                        array (
+                'location' => array(
+                    array(
+                        array(
                             'param' => 'post_type',
                             'operator' => '==',
                             'value' => 'badges',
@@ -641,7 +735,7 @@ class BadgeFactor
                     ),
                 ),
                 'menu_order' => 0,
-                'options' => array (
+                'options' => array(
                     'position' => 'side',
                     'layout' => 'default',
                     'label_placement' => 'top',
@@ -654,13 +748,13 @@ class BadgeFactor
 
         endif;
 
-        if( function_exists('register_field_group') ):
+        if (function_exists('register_field_group')):
 
-            register_field_group(array (
+            register_field_group(array(
                 'id' => 'badgefactor_criteria',
                 'title' => __('Badge Criteria', 'badgefactor'),
-                'fields' => array (
-                    array (
+                'fields' => array(
+                    array(
                         'key' => 'field_56a8fb6f1e8dd',
                         'label' => __('Section Title', 'badgefactor'),
                         'name' => 'badge_criteria_title',
@@ -668,7 +762,7 @@ class BadgeFactor
                         'instructions' => '',
                         'required' => 0,
                         'conditional_logic' => 0,
-                        'wrapper' => array (
+                        'wrapper' => array(
                             'width' => '',
                             'class' => '',
                             'id' => '',
@@ -681,7 +775,7 @@ class BadgeFactor
                         'readonly' => 0,
                         'disabled' => 0,
                     ),
-                    array (
+                    array(
                         'key' => 'field_56a8ec024a013',
                         'label' => __('Criteria', 'badgefactor'),
                         'name' => 'badge_criteria',
@@ -689,7 +783,7 @@ class BadgeFactor
                         'instructions' => '',
                         'required' => 0,
                         'conditional_logic' => 0,
-                        'wrapper' => array (
+                        'wrapper' => array(
                             'width' => '',
                             'class' => '',
                             'id' => '',
@@ -700,9 +794,9 @@ class BadgeFactor
                         'media_upload' => 1,
                     ),
                 ),
-                'location' => array (
-                    array (
-                        array (
+                'location' => array(
+                    array(
+                        array(
                             'param' => 'post_type',
                             'operator' => '==',
                             'value' => 'badges',
@@ -736,27 +830,26 @@ class BadgeFactor
             'organisation',
             array(
                 'labels' => array(
-                    'name' => __( 'Organisations', 'badgefactor'),
-                    'singular_name' => __( 'Organisation', 'badgefactor' )
+                    'name' => __('Organisations', 'badgefactor'),
+                    'singular_name' => __('Organisation', 'badgefactor')
                 ),
                 'rewrite' => array(
                     'slug' => 'organisations',
                 ),
-                'capability_type'  => 'post',
-                'has_archive'      => 'organisations',
-                'public'           => true,
+                'capability_type' => 'post',
+                'has_archive' => 'organisations',
+                'public' => true,
                 'show_in_menu' => 'badgeos_badgeos',
             )
         );
 
-        if( function_exists('register_field_group') )
-        {
+        if (function_exists('register_field_group')) {
 
-            register_field_group(array (
-                'id'    => 'organisation_fields',
+            register_field_group(array(
+                'id' => 'organisation_fields',
                 'title' => __('Organisation Fields', 'badgefactor'),
-                'fields' => array (
-                    array (
+                'fields' => array(
+                    array(
                         'key' => 'field_57dfe078ccfc4',
                         'label' => 'Image',
                         'name' => 'image',
@@ -764,7 +857,7 @@ class BadgeFactor
                         'instructions' => '',
                         'required' => 0,
                         'conditional_logic' => 0,
-                        'wrapper' => array (
+                        'wrapper' => array(
                             'width' => '',
                             'class' => '',
                             'id' => '',
@@ -780,7 +873,7 @@ class BadgeFactor
                         'max_size' => '',
                         'mime_types' => '',
                     ),
-                    array (
+                    array(
                         'key' => 'field_57dfe4fed12cb',
                         'label' => 'Twitter link',
                         'name' => 'twitter_link',
@@ -788,7 +881,7 @@ class BadgeFactor
                         'instructions' => '',
                         'required' => 0,
                         'conditional_logic' => 0,
-                        'wrapper' => array (
+                        'wrapper' => array(
                             'width' => '',
                             'class' => '',
                             'id' => '',
@@ -796,7 +889,7 @@ class BadgeFactor
                         'default_value' => '',
                         'placeholder' => '',
                     ),
-                    array (
+                    array(
                         'key' => 'field_57dfe520d12cc',
                         'label' => 'LinkedIn Link',
                         'name' => 'linkedin_link',
@@ -804,7 +897,7 @@ class BadgeFactor
                         'instructions' => '',
                         'required' => 0,
                         'conditional_logic' => 0,
-                        'wrapper' => array (
+                        'wrapper' => array(
                             'width' => '',
                             'class' => '',
                             'id' => '',
@@ -812,7 +905,7 @@ class BadgeFactor
                         'default_value' => '',
                         'placeholder' => '',
                     ),
-                    array (
+                    array(
                         'key' => 'field_57dfe536d12cd',
                         'label' => 'Facebook Link',
                         'name' => 'facebook_link',
@@ -820,7 +913,7 @@ class BadgeFactor
                         'instructions' => '',
                         'required' => 0,
                         'conditional_logic' => 0,
-                        'wrapper' => array (
+                        'wrapper' => array(
                             'width' => '',
                             'class' => '',
                             'id' => '',
@@ -829,16 +922,16 @@ class BadgeFactor
                         'placeholder' => '',
                     ),
                 ),
-                'location' => array (
-                    array (
-                        array (
+                'location' => array(
+                    array(
+                        array(
                             'param' => 'post_type',
                             'operator' => '==',
                             'value' => 'organisation',
                         ),
                     ),
                 ),
-                'options' => array (
+                'options' => array(
                     'position' => 'side',
                     'layout' => 'default',
                     'label_placement' => 'top',
@@ -859,28 +952,29 @@ class BadgeFactor
      * Create Submission
      * @since  1.0.0
      * @param  integer $achievement_id The achievement ID intended for submission
-     * @param  string  $title          The title of the post
-     * @param  string  $content        The post content
-     * @param  integer $user_id        The user ID
+     * @param  string $title The title of the post
+     * @param  string $content The post content
+     * @param  integer $user_id The user ID
      * @return boolean                 Returns true if able to create form
      */
-    function create_submission( $achievement_id  = 0, $title = '', $content = '', $user_id = 0 ) {
+    function create_submission($achievement_id = 0, $title = '', $content = '', $user_id = 0)
+    {
 
         $submission_data = array(
-            'post_title'	=>	$title,
-            'post_content'	=>	$content,
-            'post_status'	=>	'publish',
-            'post_author'	=>	$user_id,
-            'post_type'		=>	'submission',
+            'post_title' => $title,
+            'post_content' => $content,
+            'post_status' => 'publish',
+            'post_author' => $user_id,
+            'post_type' => 'submission',
         );
 
         //insert the post into the database
-        if ( $submission_id = wp_insert_post( $submission_data ) ) {
+        if ($submission_id = wp_insert_post($submission_data)) {
             // save the achievement ID related to the submission
-            add_post_meta( $submission_id, '_badgeos_submission_achievement_id', $achievement_id );
+            add_post_meta($submission_id, '_badgeos_submission_achievement_id', $achievement_id);
 
             // Available action for other processes
-            do_action( 'badgeos_save_submission', $submission_id );
+            do_action('badgeos_save_submission', $submission_id);
 
             // Submission status workflow
             $status_args = array(
@@ -891,13 +985,13 @@ class BadgeFactor
             $status = 'pending';
 
             // Check if submission is auto approved or not
-            if ( badgeos_is_submission_auto_approved( $submission_id ) ) {
+            if (badgeos_is_submission_auto_approved($submission_id)) {
                 $status = 'approved';
 
-                $status_args[ 'auto' ] = true;
+                $status_args['auto'] = true;
             }
 
-            badgeos_set_submission_status( $submission_id, $status, $status_args );
+            badgeos_set_submission_status($submission_id, $status, $status_args);
 
             return $submission_id;
 
@@ -910,40 +1004,42 @@ class BadgeFactor
 
     public function submission_rewrite_bp_uri($path)
     {
-        $members_page_slug = str_replace(home_url()."/", '', get_permalink(get_option('bp-pages')['members']));
+        $members_page_slug = str_replace(home_url() . "/", '', get_permalink(get_option('bp-pages')['members']));
         $members_badge_slug = "badges";
-        if( preg_match("#{$members_page_slug}(.*)/{$members_badge_slug}/(.*)#", $path) ) {
-	    global $wp;
-	    $path = $wp->request;
-	    return $path;
+        if (preg_match("#{$members_page_slug}(.*)/{$members_badge_slug}/(.*)#", $path)) {
+            global $wp;
+            $path = $wp->request;
+            return $path;
         }
         return $path;
     }
-	
+
     public function add_member_badges_page()
     {
         add_rewrite_tag('%member%', '([^&]+)');
-	add_rewrite_tag('%badges%', '([^&]+)');
-        add_rewrite_rule('^members/([^/]+)/badges/([^/]+)/?$','index.php?badges=$matches[2]&member=$matches[1]','top');
+        add_rewrite_tag('%badges%', '([^&]+)');
+        add_rewrite_rule('^members/([^/]+)/badges/([^/]+)/?$', 'index.php?badges=$matches[2]&member=$matches[1]', 'top');
         flush_rewrite_rules();
     }
 
-    public function parse_member_badge_request() {
+    public function parse_member_badge_request()
+    {
         //echo get_single_template(); die;
-	    if ( get_query_var( 'member' ) && get_query_var( 'badges' ) ) {
-            
-		$url = $_SERVER['REQUEST_URI'];
-		$segments = explode('/', parse_url($url, PHP_URL_PATH));
-		$badge_slug = $segments[4];
-		$badge_id = $this->get_badge_id_by_slug($badge_slug);
-		$user = get_user_by('login', $segments[2]);
-		$submission = $this->get_submission($badge_id, $user->ID);
-		if (($user->ID != wp_get_current_user()->ID && $GLOBALS['badgefactor']->is_achievement_private($submission->ID) === true)){
-			$user_path = '/' . $segments[1]. '/' . $segments[2];
-			wp_safe_redirect( $user_path );
-		}    
-		add_filter('template_include', function() {
-                if(file_exists(get_template_directory() . '/templates/single-badges.php')){
+        if (get_query_var('member') && get_query_var('badges')) {
+
+            $url = $_SERVER['REQUEST_URI'];
+            $segments = explode('/', parse_url($url, PHP_URL_PATH));
+            $badge_slug = $segments[4];
+            $badge_id = $this->get_badge_id_by_slug($badge_slug);
+            $user = get_user_by('slug', $segments[2]);
+
+            $submission = $this->get_submission($badge_id, $user);
+            if (($user->ID != wp_get_current_user()->ID && $GLOBALS['badgefactor']->is_achievement_private($submission->ID) === true)) {
+                $user_path = '/' . $segments[1] . '/' . $segments[2];
+                wp_safe_redirect($user_path);
+            }
+            add_filter('template_include', function () {
+                if (file_exists(get_template_directory() . '/templates/single-badges.php')) {
                     return get_template_directory() . '/templates/single-badges.php';
                 } else {
                     return $this->directory_path . '/templates/single-badges.php';
@@ -966,15 +1062,13 @@ class BadgeFactor
     private function create_badge_submission_form($post)
     {
         // Check if $post is a valid WP_Post object
-        if (!($post instanceof WP_Post))
-        {
-            return new WP_Error( 'invalid', __( 'Invalid badge object', 'badgefactor' ) );
+        if (!($post instanceof WP_Post)) {
+            return new WP_Error('invalid', __('Invalid badge object', 'badgefactor'));
         }
         $title = $post->post_title;
 
         // Create form if it doesn't exist yet
-        if (RGFormsModel::is_unique_title( $title ))
-        {
+        if (RGFormsModel::is_unique_title($title)) {
             try {
                 $form = array();
                 $form['title'] = $title;
@@ -982,7 +1076,7 @@ class BadgeFactor
                 $form['descriptionPlacement'] = 'below';
                 $form['button'] = new GF_Field_Text(
                     array(
-                        'text' => esc_attr( get_option('badgefactor_default_form_button_text', 'Send') ),
+                        'text' => esc_attr(get_option('badgefactor_default_form_button_text', 'Send')),
                     )
                 );
                 $form["version"] = "1.9.15.14";
@@ -1008,7 +1102,7 @@ class BadgeFactor
 
                 $form_id = GFAPI::add_form($form);
                 $pdf_settings = array(
-                    'name' => $title.' PDF',
+                    'name' => $title . ' PDF',
                     'template' => 'zadani',
                     'filename' => '{user:ID}-{form_id}-{entry_id}',
                     'save' => 'Yes'
@@ -1016,8 +1110,7 @@ class BadgeFactor
                 $pdf = GPDFAPI::add_pdf($form_id, $pdf_settings);
 
                 return $form_id;
-            }
-            catch (Exception $e) {
+            } catch (Exception $e) {
                 return new WP_Error('error', $e->getMessage());
             }
         }
@@ -1038,7 +1131,7 @@ class BadgeFactor
         $page = array(
             'post_type' => 'page',
             'post_content' => $form_page_text .
-                '[badgeos_gravityform_submission gravityform_id="'. $form_id . '"]',
+                '[badgeos_gravityform_submission gravityform_id="' . $form_id . '"]',
             'post_author' => $user_ID,
             'post_status' => 'draft',
             'post_title' => $title . ' - Formulaire',
@@ -1046,8 +1139,7 @@ class BadgeFactor
 
         $post_id = wp_insert_post($page, true);
 
-        if (is_wp_error($post_id))
-        {
+        if (is_wp_error($post_id)) {
             return $post_id;
         }
 
@@ -1057,8 +1149,8 @@ class BadgeFactor
             global $wpdb;
 
             $default_lang = $sitepress->get_default_language();
-            $trid = 1 + $wpdb->get_var( "SELECT MAX(trid) FROM {$wpdb->prefix}icl_translations" );
-            $wpdb->insert($wpdb->prefix.'icl_translations', array( 'element_type' => 'post_page', 'element_id' => $post_id, 'trid' => $trid, 'language_code' => $default_lang ));
+            $trid = 1 + $wpdb->get_var("SELECT MAX(trid) FROM {$wpdb->prefix}icl_translations");
+            $wpdb->insert($wpdb->prefix . 'icl_translations', array('element_type' => 'post_page', 'element_id' => $post_id, 'trid' => $trid, 'language_code' => $default_lang));
         }
 
         return $post_id;
@@ -1073,9 +1165,8 @@ class BadgeFactor
     private function create_course_page($post, $content = null)
     {
         // Check if $post is a valid WP_Post object
-        if (!($post instanceof WP_Post))
-        {
-            return new WP_Error( 'invalid', __( 'Invalid badge object', 'badgefactor' ) );
+        if (!($post instanceof WP_Post)) {
+            return new WP_Error('invalid', __('Invalid badge object', 'badgefactor'));
         }
 
         $title = $post->post_title;
@@ -1091,13 +1182,12 @@ class BadgeFactor
 
         $post_id = wp_insert_post($page, true);
 
-        if (is_wp_error($post_id))
-        {
+        if (is_wp_error($post_id)) {
             return $post_id;
         }
 
         // Add necessary post metas to course page
-        update_post_meta( $post_id, 'is_course_page', TRUE);
+        update_post_meta($post_id, 'is_course_page', TRUE);
 
         // Including WPML translation
         if (class_exists('SitePress')) {
@@ -1105,8 +1195,8 @@ class BadgeFactor
             global $wpdb;
 
             $default_lang = $sitepress->get_default_language();
-            $trid = 1 + $wpdb->get_var( "SELECT MAX(trid) FROM {$wpdb->prefix}icl_translations" );
-            $wpdb->insert($wpdb->prefix.'icl_translations', array( 'element_type' => 'post_page', 'element_id' => $post_id, 'trid' => $trid, 'language_code' => $default_lang ));
+            $trid = 1 + $wpdb->get_var("SELECT MAX(trid) FROM {$wpdb->prefix}icl_translations");
+            $wpdb->insert($wpdb->prefix . 'icl_translations', array('element_type' => 'post_page', 'element_id' => $post_id, 'trid' => $trid, 'language_code' => $default_lang));
         }
 
         return $post_id;
@@ -1117,20 +1207,17 @@ class BadgeFactor
      */
     private function plugin_path()
     {
-        return untrailingslashit( plugin_dir_path( __FILE__ ) );
+        return untrailingslashit(plugin_dir_path(__FILE__));
 
     }
 
-    public function locate_archive_templates( $template )
+    public function locate_archive_templates($template)
     {
         global $post;
 
-        if (is_post_type_archive('organisation'))
-        {
+        if (is_post_type_archive('organisation')) {
             $template = $this->plugin_path() . '/templates/archive-organisation.php';
-        }
-        else if (is_post_type_archive('badges'))
-        {
+        } else if (is_post_type_archive('badges')) {
             $template = $this->plugin_path() . '/templates/archive-badges.php';
         }
 
@@ -1141,20 +1228,19 @@ class BadgeFactor
     public function locate_single_templates()
     {
         global $post;
-        switch ($post->post_type)
-        {
+        switch ($post->post_type) {
             case 'organisation':
-                if(file_exists(get_template_directory() . '/templates/single-organisation.php')){
+                if (file_exists(get_template_directory() . '/templates/single-organisation.php')) {
                     $template = get_template_directory() . '/templates/single-organisation.php';
                 } else {
-                            $template = $this->plugin_path() . '/templates/single-organisation.php';
+                    $template = $this->plugin_path() . '/templates/single-organisation.php';
                 }
                 break;
             case 'badges':
-                if(file_exists(get_template_directory() . '/templates/single-badges.php')){
-		            $template = get_template_directory() . '/templates/single-badges.php';
+                if (file_exists(get_template_directory() . '/templates/single-badges.php')) {
+                    $template = get_template_directory() . '/templates/single-badges.php';
                 } else {
-                            $template = $this->plugin_path() . '/templates/single-badges.php';
+                    $template = $this->plugin_path() . '/templates/single-badges.php';
                 }
                 break;
             default:
@@ -1182,10 +1268,11 @@ class BadgeFactor
         return get_post($badge_id);
     }
 
-    public function get_badge_id_by_slug($badge_slug) {
+    public function get_badge_id_by_slug($badge_slug)
+    {
         $args = array(
-            'name'        => $badge_slug,
-            'post_type'   => 'badges',
+            'name' => $badge_slug,
+            'post_type' => 'badges',
             'post_status' => 'publish',
             'numberposts' => 1
         );
@@ -1207,8 +1294,7 @@ class BadgeFactor
     public function get_badge_earners($badge_id)
     {
         $result = FALSE;
-        if (function_exists('badgeos_get_achievement_earners_list'))
-        {
+        if (function_exists('badgeos_get_achievement_earners_list')) {
             $result = badgeos_get_achievement_earners($badge_id);
 
             foreach($result as $key => $earner){
@@ -1229,9 +1315,8 @@ class BadgeFactor
             'post_type' => 'organisation',
             'posts_per_page' => -1,
         ];
-        if ($exclude_self)
-        {
-            $args['post__not_in'] = array( $post->ID );
+        if ($exclude_self) {
+            $args['post__not_in'] = array($post->ID);
         }
         $query = new WP_Query($args);
 
@@ -1244,11 +1329,11 @@ class BadgeFactor
         return get_permalink(get_field('badgefactor_page_id', $badge_id));
     }
 
-	public function badge_has_criteria($badge_id)
-	{
-		return !empty(get_field('badge_criteria', $badge_id));
+    public function badge_has_criteria($badge_id)
+    {
+        return !empty(get_field('badge_criteria', $badge_id));
 
-	}
+    }
 
     public function get_badge_criteria_title($badge_id)
     {
@@ -1280,7 +1365,7 @@ class BadgeFactor
         $query = new WP_Query([
             'post_status' => 'publish',
             'post_type' => 'badges',
-            'meta_key'  => 'organisation',
+            'meta_key' => 'organisation',
             'meta_value' => $organisation_id,
             'posts_per_page' => -1,
         ]);
@@ -1289,40 +1374,54 @@ class BadgeFactor
     }
 
 
-
     /**
      * Display currently earned badges for author.
      * @param  integer $userID ID of the user whose achievements to display.
      * @return mixed           echo'd badge loop.
      */
-    public function get_user_achievements ( $author_id ) {
+    public function get_user_achievements($author_id)
+    {
 
-	    $achievements_query = [
-		    'posts_per_page' => -1,
-		    'post_type' => ['submission', 'nomination'],
-		    'author' => $author_id
-	    ];
+        $submissions_query = [
+            'posts_per_page' => -1,
+            'post_type' => 'submission',
+            'author' => $author_id,
+        ];
+        $submissions = new WP_Query($submissions_query);
 
-	    $achievements = new WP_Query($achievements_query);
+        wp_reset_postdata();
 
-	    return $achievements->get_posts();
+        $nominations_query = [
+            'posts_per_page' => -1,
+            'post_type' => 'nomination',
+            'meta_query' => array(array(
+                'key' => '_badgeos_nomination_user_id',
+                'value' => $author_id,
+                'compare' => '='
+            ))
+        ];
+        $nominations = new WP_Query($nominations_query);
+
+        wp_reset_postdata();
+        return array_merge($submissions->get_posts(), $nominations->get_posts());
     }
 
     /**
      * Display currently earned badges for author.
-     * @param  integer $count   How many posts to display per page
+     * @param  integer $count How many posts to display per page
      * @param  integer $author_id ID of the author to display. Defaults to ID 1
      * @return mixed           echo'd badge loop.
      */
-    function user_achievements( $author_id ) {
+    function user_achievements($author_id)
+    {
 
         $achievements = $this->get_user_achievements($author_id);
 
-        foreach ( $achievements as $post) {
-	        echo badgeos_get_achievement_post_thumbnail();
-	        echo "<span class='badgeos-title-wrap'>";
-	        the_title();
-	        echo "</span>";
+        foreach ($achievements as $post) {
+            echo badgeos_get_achievement_post_thumbnail();
+            echo "<span class='badgeos-title-wrap'>";
+            the_title();
+            echo "</span>";
 
         }
     }
@@ -1332,7 +1431,8 @@ class BadgeFactor
      * @param  integer $url a string we want to be sure has http:// in front of
      * @return interger url with http://
      */
-    public function addhttp($url) {
+    public function addhttp($url)
+    {
         if (!preg_match("~^(?:f|ht)tps?://~i", $url)) {
             $url = "http://" . $url;
         }
@@ -1343,8 +1443,9 @@ class BadgeFactor
      * @param $url
      * @return mixed
      */
-    public function getSslPage($url) {
-        $agent= 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.0.3705; .NET CLR 1.1.4322)';
+    public function getSslPage($url)
+    {
+        $agent = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.0.3705; .NET CLR 1.1.4322)';
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
@@ -1358,32 +1459,34 @@ class BadgeFactor
     }
 
 
-	/**
+    /**
      * Returns badge associated with submission passed in parameter.
      * If variable passed in parameter is a badge and not a submission, it will return it.
-	 * @param $submission
-	 * @return bool|WP_Post
-	 */
-	public function get_badge_by_submission($submission)
-	{
+     * @param $submission
+     * @return bool|WP_Post
+     */
+    public function get_badge_by_submission($submission)
+    {
         $badge = false;
-		if ($submission->post_type == 'submission')
-		{
-			$badge_id = get_post_meta($submission->ID, '_badgeos_submission_achievement_id');
-			$badge_id = is_array($badge_id) ? $badge_id[0] : $badge_id;
-			if ($badge_id)
-			{
-				$badge = get_post($badge_id);
-			}
-		}
-		else if ($submission->post_type == 'badges')
-		{
-			$badge = $submission;
+        if ($submission->post_type == 'submission') {
+            $badge_id = get_post_meta($submission->ID, '_badgeos_submission_achievement_id');
+            $badge_id = is_array($badge_id) ? $badge_id[0] : $badge_id;
+            if ($badge_id) {
+                $badge = get_post($badge_id);
+            }
+        } elseif ($submission->post_type == 'nomination') {
+            $badge_id = get_post_meta($submission->ID, '_badgeos_nomination_achievement_id');
+            $badge_id = is_array($badge_id) ? $badge_id[0] : $badge_id;
+            if ($badge_id) {
+                $badge = get_post($badge_id);
+            }
+        } else if ($submission->post_type == 'badges') {
+            $badge = $submission;
 
-		}
+        }
 
-		return $badge;
-	}
+        return $badge;
+    }
 
     /**
      * @param $page_slug
@@ -1391,14 +1494,15 @@ class BadgeFactor
      * @param string $post_type
      * @return array|null|WP_Post
      */
-    public function get_page_by_slug($page_slug, $output = OBJECT, $post_type = 'page' ) {
-	  	global $wpdb;
-	   	$page = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_name = %s AND post_type= %s AND post_status = 'publish'", $page_slug, $post_type ) );
+    public function get_page_by_slug($page_slug, $output = OBJECT, $post_type = 'page')
+    {
+        global $wpdb;
+        $page = $wpdb->get_var($wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_name = %s AND post_type= %s AND post_status = 'publish'", $page_slug, $post_type));
 
-	    if ( $page )
-	    	return get_post($page, $output);
-		return null;
-	}
+        if ($page)
+            return get_post($page, $output);
+        return null;
+    }
 
 
     /**
@@ -1406,7 +1510,7 @@ class BadgeFactor
      * @param $user_login
      * @return mixed
      */
-	public function get_submission($badge_id, $wp_user)
+    public function get_submission($badge_id, $wp_user)
     {
         if (is_int($wp_user) && $wp_user > 0)
         {
@@ -1425,8 +1529,7 @@ class BadgeFactor
             'posts_per_page' => 1,
         ]);
         $return = $query->get_posts();
-        if (empty($return))
-        {
+        if (empty($return)) {
             $query = new WP_Query([
                 'post_status' => 'publish',
                 'post_type' => 'nomination',
@@ -1449,45 +1552,43 @@ class BadgeFactor
 
     }
 
-    public function get_proof($submission_id) {
+    public function get_proof($submission_id)
+    {
         global $wpdb;
 
-	    if ( class_exists( 'GFCommon' ))
-        {
-	        $row = $wpdb->get_row(
-		        $wpdb->prepare(
-			        "SELECT pdf.form_id AS form_id,
+        if (class_exists('GFCommon')) {
+            $row = $wpdb->get_row(
+                $wpdb->prepare(
+                    "SELECT pdf.form_id AS form_id,
                          pdfm.display_meta AS form_meta,
-                         pdf.entry_id AS lead_id
-                         FROM {$wpdb->prefix}gf_entry_meta AS pdf
+                         pdf.lead_id AS lead_id
+                         FROM {$wpdb->prefix}rg_lead_detail AS pdf
                          INNER JOIN {$wpdb->prefix}postmeta AS pm
-                         ON pdf.meta_value = pm.meta_value
+                         ON pdf.value = pm.meta_value
                          INNER JOIN {$wpdb->prefix}posts AS p
                          ON p.ID = pm.post_id
-                         INNER JOIN {$wpdb->prefix}gf_form_meta AS pdfm
+                         INNER JOIN {$wpdb->prefix}rg_form_meta AS pdfm
                          ON pdf.form_id = pdfm.form_id
                          WHERE p.post_status = 'publish'
                          AND pm.meta_key = '_badgeos_submission_achievement_id'
                          AND pm.post_id = %s", $submission_id
-		        )
-	        );
-	        // FIXME GravityForms will not work if this is not fixed... :(
-	        /*
-			echo "<pre>";
+                )
+            );
+            // FIXME GravityForms will not work if this is not fixed... :(
+            /*
+            echo "<pre>";
 
-			print_r($row);
-			$pdf_meta = json_decode($row->form_meta);
+            print_r($row);
+            $pdf_meta = json_decode($row->form_meta);
 
 
-			$pdf_id = (array)($pdf_meta->gfpdf_form_settings);
-			print_r($pdf_id); die;
-        	*/
+            $pdf_id = (array)($pdf_meta->gfpdf_form_settings);
+            print_r($pdf_id); die;
+            */
 
-	        //GPDFAPI::get_pdf($row->form_id, unshift($pdf_id)->id);
+            //GPDFAPI::get_pdf($row->form_id, unshift($pdf_id)->id);
 
-        }
-        else
-        {
+        } else {
 
         }
 
@@ -1499,9 +1600,10 @@ class BadgeFactor
      * @param $submission_id
      * @return false|null|string
      */
-    public function get_attachment_by_submission_id( $submission_id) {
+    public function get_attachment_by_submission_id($submission_id)
+    {
         $attachments = get_attached_media('application/pdf', $submission_id);
-        if ( is_array($attachments) ) {
+        if (is_array($attachments)) {
             $attachment = array_shift($attachments);
             return wp_get_attachment_url($attachment->ID);
         }
@@ -1514,7 +1616,7 @@ class BadgeFactor
      */
     public function is_current_page_awarded_achievement()
     {
-        $members_page_slug = str_replace(home_url()."/", '', get_permalink(get_option('bp-pages')['members']));
+        $members_page_slug = str_replace(home_url() . "/", '', get_permalink(get_option('bp-pages')['members']));
         // FIXME Bring into a WP Admin config variable
         $members_achievement_slug = "badges";
         // FIXME Bring into a WP Admin config variable
@@ -1533,13 +1635,13 @@ class BadgeFactor
     public function is_achievement_private($submission_id)
     {
         $post = get_post($submission_id);
-        if (!in_array($post->post_type, ['submission', 'nomination']))
-        {
+        if (!in_array($post->post_type, ['submission', 'nomination'])) {
             return true;
         }
 
         $public = true;
         $status = get_post_meta($submission_id, 'public');
+
         if (is_array($status)) {
             if (empty($status)) {
                 $this->set_achievement_public($submission_id);
@@ -1559,13 +1661,12 @@ class BadgeFactor
      */
     public function is_achievement_approved($submission_id)
     {
-        $submission = get_post( $submission_id );
+        $submission = get_post($submission_id);
 
-        $status = get_post_meta( $submission_id, '_badgeos_submission_status', true);
-        if($status != 'pending' && $status != 'denied'){
+        $status = get_post_meta($submission_id, '_badgeos_submission_status', true);
+        if ($status != 'pending' && $status != 'denied') {
             return true;
-        }
-        else{
+        } else {
             return false;
         }
     }
@@ -1578,9 +1679,9 @@ class BadgeFactor
     public function set_achievement_private($submission_id)
     {
         $post = get_post($submission_id);
-        if ($post->post_type != 'submission' || $post->post_author != get_current_user_id()){
+        if ($post->post_type != 'submission' || $post->post_author != get_current_user_id()) {
             return FALSE;
-	}
+        }
         return update_post_meta($submission_id, 'public', false);
     }
 
@@ -1592,9 +1693,9 @@ class BadgeFactor
     public function set_achievement_public($submission_id)
     {
         $post = get_post($submission_id);
-        if ($post->post_type != 'submission' || $post->post_author != get_current_user_id()){
+        if ($post->post_type != 'submission' || $post->post_author != get_current_user_id()) {
             return FALSE;
-	}
+        }
         return update_post_meta($submission_id, 'public', true);
     }
 
@@ -1606,16 +1707,16 @@ class BadgeFactor
     public function toggle_private_status($submission_id)
     {
         $post = get_post($submission_id);
-        if ($post->post_type != 'submission' || $post->post_author != get_current_user_id()){
+
+
+        if (!($post->post_type == 'submission' && $post->post_author == get_current_user_id()) && !($post->post_type == 'nomination' && get_Post_meta($post->ID, "_badgeos_nomination_user_id", true) == get_current_user_id())) {
             return FALSE;
-	}
-        $new_status = 'public';
-        if ($this->is_achievement_private($submission_id))
-        {
-            $this->set_achievement_public($submission_id);
         }
-        else
-        {
+
+        $new_status = 'public';
+        if ($this->is_achievement_private($submission_id)) {
+            $this->set_achievement_public($submission_id);
+        } else {
             $this->set_achievement_private($submission_id);
             $new_status = 'private';
         }
@@ -1633,14 +1734,13 @@ class BadgeFactor
         $bf_pages = get_option('bp-pages');
 
         //If this variable is false, the BP plugin is not on the site.
-        if($bf_pages){
-            foreach ( $bf_pages as $key => $bf_page){
-                if(strtolower($key) == "register"){
+        if ($bf_pages) {
+            foreach ($bf_pages as $key => $bf_page) {
+                if (strtolower($key) == "register") {
                     $return = $bf_page;
                 }
             }
-        }
-        else{
+        } else {
             $return = false;
         }
 
@@ -1648,36 +1748,35 @@ class BadgeFactor
     }
 
 
-	/**
-	 *
-	 */
-	public function ajax_toggle_private_status()
+    /**
+     *
+     */
+    public function ajax_toggle_private_status()
     {
-		$nonce = $_POST['nonce'];
-		if ( ! wp_verify_nonce( $nonce, 'myajax-nonce' ) )
-		{
-			die();
-		}
+        $nonce = $_POST['nonce'];
+        if (!wp_verify_nonce($nonce, 'myajax-nonce')) {
+            die();
+        }
 
-		$achievement_id = $_POST['achievement_id'];
-		$new_status = $GLOBALS['badgefactor']->toggle_private_status($achievement_id);
+        $achievement_id = $_POST['achievement_id'];
+        $new_status = $GLOBALS['badgefactor']->toggle_private_status($achievement_id);
 
-		$response = json_encode( array( 'success' => true, 'status' => $new_status) );
-		header( "Content-Type: application/json" );
-		echo $response;
+        $response = json_encode(array('success' => true, 'status' => $new_status));
+        header("Content-Type: application/json");
+        echo $response;
 
-		exit;
-	}
+        exit;
+    }
 
 
-	public function badgefactor_scripts()
+    public function badgefactor_scripts()
     {
-	    wp_register_script( 'badgefactor-script', plugins_url( '/assets/js/bf.js', __FILE__ ) );
-	    wp_enqueue_script( 'badgefactor-script' );
-	    wp_localize_script('badgefactor-script', 'MyAjax', array(
-		    'url' => admin_url( 'admin-ajax.php'),
-		    'nonce' => wp_create_nonce('myajax-nonce'),
-	    ));
+        wp_register_script('badgefactor-script', plugins_url('/assets/js/bf.js', __FILE__));
+        wp_enqueue_script('badgefactor-script');
+        wp_localize_script('badgefactor-script', 'MyAjax', array(
+            'url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('myajax-nonce'),
+        ));
     }
 
 }
