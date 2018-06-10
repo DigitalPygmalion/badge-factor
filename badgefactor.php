@@ -667,18 +667,20 @@ class BadgeFactor
                         'first_day' => 1,
                     ),
                     array(
-                        'key' => 'field_584acafa654f8',
+                        'key' => 'field_584acafa654f9',
                         'label' => 'Date de fin',
                         'name' => 'end_date',
                         'type' => 'date_picker',
                         'instructions' => '',
                         'required' => 0,
                         'conditional_logic' => array(array(
+                            'status' => 1,
                             array(
                                 "field" => "field_584acbfa454f8",
                                 "operator" => "==",
                                 "value" => "end_date"
-                            ))
+                            )),
+                            'allorany' => 'all',
                         ),
                         'wrapper' => array(
                             'width' => '',
@@ -690,7 +692,7 @@ class BadgeFactor
                         'first_day' => 1,
                     ),
                     array(
-                        'key' => 'field_584acbfa654f8',
+                        'key' => 'field_584acbfa654fa',
                         'label' => 'Durée de validité',
                         'name' => 'duree_fin',
                         'type' => 'number',
@@ -698,11 +700,13 @@ class BadgeFactor
                         'required' => 0,
                         'append' => 'an(s)',
                         'conditional_logic' => array(array(
+                            'status' => 1,
                             array(
                                 "field" => "field_584acbfa454f8",
                                 "operator" => "==",
                                 "value" => "duree_fin"
-                            ))
+                            )),
+                            'allorany' => 'all',
                         ),
                         'wrapper' => array(
                             'width' => '',
@@ -710,12 +714,6 @@ class BadgeFactor
                             'id' => '',
                         ),
                         'first_day' => 1,
-                    ),
-                    array(
-                        'key' => 'field_59159159271cc',
-                        'label' => 'ID Cours Moodle',
-                        'name' => 'id_cours_moodle',
-                        'type' => 'text',
                     ),
                     /*
                     array(
