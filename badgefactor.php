@@ -1773,8 +1773,8 @@ class BadgeFactor
 
     public function badgefactor_scripts()
     {
-        wp_register_script('badgefactor-script', plugins_url('/assets/js/bf.js', __FILE__));
-        wp_enqueue_script('badgefactor-script', '', ['jquery']);
+        wp_register_script('badgefactor-script', plugins_url('/assets/js/bf.js', __FILE__), ['jquery']);
+        wp_enqueue_script('badgefactor-script');
         wp_localize_script('badgefactor-script', 'MyAjax', array(
             'url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('myajax-nonce'),
