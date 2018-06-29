@@ -1216,15 +1216,23 @@ class BadgeFactor
     public function locate_archive_templates($template)
     {
         global $post;
-
-        if (is_post_type_archive('organisation')) {
-            $template = $this->plugin_path() . '/templates/archive-organisation.php';
-        } else if (is_post_type_archive('badges')) {
-            $template = $this->plugin_path() . '/templates/archive-badges.php';
+        switch($post->post_type) {
+            case 'organisation':
+                if (file_exists(get_template_directory() . '/templates/archive-organisation.php')) {
+                    $template = get_template_directory() . '/templates/archive-organisation.php';
+                } else {
+                    $template = $this->plugin_path() . '/templates/archive-organisation.php';
+                }
+                break;
+            case 'badges':
+                if (file_exists(get_template_directory() . '/templates/archive-badges.php')) {
+                    $template = get_template_directory() . '/templates/archive-badges.php';
+                } else {
+                    $template = $this->plugin_path() . '/templates/archive-badges.php';
+                }
+                break;
         }
-
         return $template;
-
     }
 
     public function locate_single_templates()
