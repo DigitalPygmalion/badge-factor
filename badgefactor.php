@@ -1724,8 +1724,8 @@ class BadgeFactor
     {
         $post = get_post($submission_id);
 
-        if ($post->post_type === 'submission' && $post->post_author === get_current_user_id() ||
-            $post->post_type === 'nomination' && get_post_meta($post->ID, "_badgeos_nomination_user_id", true) === get_current_user_id() ) {
+        if ($post->post_type === 'submission' && $post->post_author == get_current_user_id() ||
+            $post->post_type === 'nomination' && get_post_meta($post->ID, "_badgeos_nomination_user_id", true) == get_current_user_id() ) {
 
             $new_status = 'public';
             if ($this->is_achievement_private($submission_id)) {
