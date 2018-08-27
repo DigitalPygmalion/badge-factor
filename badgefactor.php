@@ -182,7 +182,7 @@ class BadgeFactor
         add_menu_page('Badge Factor', 'Badge Factor', $minimum_role, 'badgeos_badgeos', 'badgeos_settings', $this->directory_url . 'images/badgefactor_icon.png', 110);
         add_submenu_page('badgeos_badgeos', __('Badge Factor Options', 'badgefactor'), __('Options', 'badgefactor'), 'manage_options', 'badgefactor', array($this, 'badgefactor_options'));
         add_submenu_page('badgeos_badgeos', __('Category', 'badgefactor'), __('Category', 'badgefactor'), current_user_can(badgeos_get_manager_capability()), 'edit-tags.php?taxonomy=badge_category&post_type=badges', false);
-
+        add_submenu_page('badgeos_badgeos', __('Statistics', 'badgefactor'), __('Statistics', 'badgefactor'), current_user_can(badgeos_get_manager_capability()), 'badgefactor_statistics', array($this, 'statistics_page'));
     }
 
     /**
@@ -289,6 +289,77 @@ class BadgeFactor
         register_setting('badgefactor-settings-group', 'badge_partage_public');
     }
 
+    
+    public function statistics_page()
+    {
+        $nb_submissions = wp_count_posts('submission')->publish;
+        $nb_nominations = wp_count_posts('nomination')->publish;
+        $nb_badges = wp_count_posts('badges')->publish;
+        $nb_total = $nb_submissions + $nb_nominations;
+
+        global $wpdb;
+        $nb_learners = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}users 
+          WHERE ID IN (
+            SELECT DISTINCT post_author FROM {$wpdb->prefix}posts 
+            WHERE post_type = 'submission'
+            AND post_status = 'publish'
+          ) OR ID IN (
+            SELECT DISTINCT meta_value FROM {$wpdb->prefix}postmeta
+            INNER JOIN {$wpdb->prefix}posts
+            ON {$wpdb->prefix}posts.ID = {$wpdb->prefix}postmeta.post_id
+            WHERE {$wpdb->prefix}posts.post_type = 'submission'
+            AND {$wpdb->prefix}posts.post_status = 'publish'
+            AND {$wpdb->prefix}postmeta.meta_key = '_badgeos_nomination_user_id'
+          )
+        ");
+
+        ?>
+        <div class="wrap">
+        <table class="wp-list-table widefat fixed striped">
+            <thead>
+            <tr>
+                <th scope="col" id="statistic" class="manage-column column-primary"><span><?php echo __('Statistic', 'badgefactor'); ?></span></th>
+                <th scope="col" id="value" class="manage-column column-value"><?php echo __('Value', 'badgefactor'); ?></th>
+            </tr>
+            </thead>
+
+            <tbody id="the-list">
+            <tr class="level-0 type-page hentry">
+                <td class="title column-primary" data-colname="Statistic">
+                    <strong><?php echo __('Number of available badges', 'badgefactor'); ?></strong>
+                </td>
+                <td class="column-date" data-colname="Value"><?php echo $nb_badges; ?></td>
+            </tr>
+            <tr class="level-0 type-page hentry">
+                <td class="title column-primary" data-colname="Statistic">
+                    <strong><?php echo __('Number of earned submission badges', 'badgefactor'); ?></strong>
+                </td>
+                <td class="column-date" data-colname="Value"><?php echo $nb_submissions; ?></td>
+            </tr>
+            <tr class="level-0 type-page hentry">
+                <td class="title column-primary" data-colname="Statistic">
+                    <strong><?php echo __('Number of earned nomination badges', 'badgefactor'); ?></strong>
+                </td>
+                <td class="column-date" data-colname="Value"><?php echo $nb_nominations; ?></td>
+            </tr>
+            <tr class="level-0 type-page hentry">
+                <td class="title column-primary" data-colname="Statistic">
+                    <strong><?php echo __('Number of earned badges in total', 'badgefactor'); ?></strong>
+                </td>
+                <td class="column-date" data-colname="Value"><?php echo $nb_total; ?></td>
+            </tr>
+            <tr class="level-0 type-page hentry">
+                <td class="title column-primary" data-colname="Statistic">
+                    <strong><?php echo __('Number of learners', 'badgefactor'); ?></strong>
+                </td>
+                <td class="column-date" data-colname="Value"><?php echo $nb_learners; ?></td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        <?php
+    }
+    
 
     public function generate_useful_links($field)
     {
