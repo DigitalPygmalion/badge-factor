@@ -1467,6 +1467,11 @@ class BadgeFactor
             'posts_per_page' => -1,
             'post_type' => 'submission',
             'author' => $author_id,
+            'meta_query' => array(array(
+                'key' => '_badgeos_submission_status',
+                'value' => 'approved',
+                'compare' => '='
+            ))
         ];
         $submissions = new WP_Query($submissions_query);
 
@@ -1478,6 +1483,10 @@ class BadgeFactor
             'meta_query' => array(array(
                 'key' => '_badgeos_nomination_user_id',
                 'value' => $author_id,
+                'compare' => '='
+            ), array(
+                'key' => '_badgeos_nomination_status',
+                'value' => 'approved',
                 'compare' => '='
             ))
         ];
