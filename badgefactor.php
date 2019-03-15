@@ -117,8 +117,8 @@ class BadgeFactor
         add_image_size('square-225', 225, 225, false);
         add_image_size('square-450', 450, 450, false);
 
-        
-
+        add_action('admin_enqueue_scripts', array($this, 'admin_submission_approval'), 99);
+        add_action('wp_ajax_bf-update-status', array($this, 'ajax_update_status'));
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -564,6 +564,16 @@ class BadgeFactor
             'show_in_menu' => 'badgeos_badgeos',
             'query_var' => true,
             'capability_type' => 'post',
+            'capabilities' => array(
+                'edit_post'          => 'edit_badges',
+                'read_post'          => 'read_badge',
+                'delete_post'        => 'delete_badge',
+                'edit_posts'         => 'edit_badges',
+                'edit_others_posts'  => 'edit_others_badges',
+                'publish_posts'      => 'publish_badges',
+                'read_private_posts' => 'read_private_badges',
+                'create_posts'       => 'edit_badges',
+            ),
             'has_archive' => 'badges',
             'hierarchical' => true,
             'menu_position' => null,
@@ -1874,6 +1884,41 @@ class BadgeFactor
             'url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('myajax-nonce'),
         ));
+    }
+
+    public function admin_submission_approval($hook)
+    {
+        global $post;
+
+        // Do not pollute other post types
+        if ( 'edit.php' !== $hook || ! in_array( $post->post_type, array( 'submission', 'nomination' ) ) ) {
+            return;
+        }
+        wp_enqueue_script('admin_submission_approval', plugin_dir_url(__FILE__).'assets/js/admin-submission-approval.js');
+        wp_localize_script('admin_submission_approval', 'AdminAjax', array(
+            'url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('badgeos_status_action'),
+        ));
+        
+    }
+
+    public function ajax_update_status()
+    {
+        if(!isset($_POST['postid']) || !isset($_POST['userid']) || !isset($_POST['posttype']) || !isset($_POST['update_action']) || !isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'badgeos_status_action')) {
+            die;
+        }
+
+        if ($_POST['posttype'] === 'submission') {
+            $status = ($_POST['update_action'] === 'approve' ? 'approved' : 'denied');
+            update_post_meta($_POST['postid'], '_badgeos_submission_status', $status);
+            echo $status;
+        }
+        elseif ($_POST['posttype'] === 'nomination') {
+            $status = ($_POST['update_action'] === 'approve' ? 'approved' : 'denied');
+            update_post_meta($_POST['postid'], '_badgeos_nomination_status', $status);
+            echo $status;
+        }
+        die;
     }
 
 }
