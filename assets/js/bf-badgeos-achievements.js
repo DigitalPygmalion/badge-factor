@@ -130,7 +130,8 @@ jQuery( function( $ ) {
         'exclude' : badgeos.exclude,
         'meta_key' : badgeos.meta_key,
         'meta_value' : badgeos.meta_value,
-        'category'   : badgeos.category
+        'category'   : badgeos.category,
+        'organisation_id': badgeos.organisation_id
       },
       dataType : 'json',
       success : function( response ) {

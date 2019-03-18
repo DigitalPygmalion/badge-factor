@@ -2077,6 +2077,7 @@ class BadgeFactor
             'meta_key'    => '',
             'meta_value'  => '',
             'category'    => '',
+            'organisation_id' => '',
         ), $atts ) );
 
         wp_enqueue_style( 'badgeos-front' );
@@ -2100,6 +2101,7 @@ class BadgeFactor
             'meta_key'    => $meta_key,
             'meta_value'  => $meta_value,
             'category'    => $category,
+            'organisation_id'=> $organisation_id,
         );
         wp_localize_script( 'bf-badgeos-achievements', 'badgeos', $data );
 
@@ -2186,7 +2188,7 @@ class BadgeFactor
             $exclude = implode(',', $exclude);
         }
 
-        $maindiv = '<div class="badgeos_achievement_main_container" data-url="'.esc_url( admin_url( 'admin-ajax.php', 'relative' ) ).'" data-type="'.$type.'" data-limit="'.$limit.'" data-show_child="'.$show_child.'" data-show_parent="'.$show_parent.'" data-show_filter="'.$show_filter.'" data-show_search="'.$show_search.'" data-group_id="'.$group_id.'" data-user_id="'.$user_id.'" data-wpms="'.$wpms.'" data-orderby="'.$orderby.'" data-order="'.$order.'" data-include="'.$include.'" data-exclude="'.$exclude.'" data-meta_key="'.$meta_key.'" data-meta_value="'.$meta_value.'" data-category="'.$category.'">';
+        $maindiv = '<div class="badgeos_achievement_main_container" data-url="'.esc_url( admin_url( 'admin-ajax.php', 'relative' ) ).'" data-type="'.$type.'" data-limit="'.$limit.'" data-show_child="'.$show_child.'" data-show_parent="'.$show_parent.'" data-show_filter="'.$show_filter.'" data-show_search="'.$show_search.'" data-group_id="'.$group_id.'" data-user_id="'.$user_id.'" data-wpms="'.$wpms.'" data-orderby="'.$orderby.'" data-order="'.$order.'" data-include="'.$include.'" data-exclude="'.$exclude.'" data-meta_key="'.$meta_key.'" data-meta_value="'.$meta_value.'" data-category="'.$category.'" data-organisation_id="'.$organisation_id.'">';
         $maindiv .= $badges;
         $maindiv .= '</div>';
 
@@ -2224,6 +2226,7 @@ class BadgeFactor
         $meta_key   = isset( $_REQUEST['meta_key'] )   ? $_REQUEST['meta_key']   : '';
         $meta_value = isset( $_REQUEST['meta_value'] ) ? $_REQUEST['meta_value'] : '';
         $category   = isset( $_REQUEST['category'] )   ? $_REQUEST['category']   : '';
+        $organisation_id = isset( $_REQUEST['organisation_id'] ) ? $_REQUEST['organisation_id'] : '';
 
         // Convert $type to properly support multiple achievement types
         if ( 'all' == $type ) {
@@ -2295,8 +2298,12 @@ class BadgeFactor
             }
 
             if ( '' !== $meta_key && '' !== $meta_value ) {
-                $args[ 'meta_key' ] = $meta_key;
-                $args[ 'meta_value' ] = $meta_value;
+                $args['meta_query'] = array(
+                    array(
+                        'key' => $meta_key,
+                        'value' => $meta_value,
+                    )
+                );
             }
 
             // Include certain achievements
@@ -2322,6 +2329,17 @@ class BadgeFactor
                         'field' => 'slug',
                         'terms' => $category,
                     ),
+                );
+            }
+
+            if ($organisation_id) {
+
+                if (!isset($args['meta_query'])) {
+                    $args['meta_query'] = array();
+                }
+                $args['meta_query'][] = array(
+                    'key' => 'organisation',
+                    'value' => $organisation_id,
                 );
             }
 
